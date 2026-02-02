@@ -1,0 +1,817 @@
+================================================================================
+ADS-B FLIGHT TRACKER - SCHEMA VERSION 5.0
+================================================================================
+Schema Date:     February 02, 2026
+Document Date:   February 02, 2026
+Version:         5.0.0
+Database:        Oracle 23ai Free (FREEPDB1)
+User:            adsb_user
+
+================================================================================
+VERSION HISTORY
+================================================================================
+
+Version 5.0 (2026-02-02) - CURRENT VERSION
+------------------------------------------
+Major enhancements:
+  ✅ Daily partitioning on POSITIONS table (14-day rolling window)
+  ✅ Flight history archiving system
+  ✅ Flight notifications table
+  ✅ Partition management automation
+  ✅ Migration tracking system
+  ✅ Enhanced cleanup procedures
+  ✅ Backup tables for safety
+
+Key Features:
+  - Positions table partitioned by day for performance
+  - Automatic partition creation and cleanup
+  - Complete flight lifecycle management
+  - Statistics archiving with distance calculations
+  - Notification queue for interesting flights
+
+Version 4.0 (2026-01-21)
+------------------------
+  - Route detection system
+  - Airport database integration
+  - Enhanced views for route analysis
+
+Version 3.0 (Earlier)
+---------------------
+  - Alert system implementation
+  - Airline database
+  - Daily statistics tracking
+
+Version 2.0 (Earlier)
+---------------------
+  - Enhanced aircraft data (manufacturer, model, operator)
+  - Coverage statistics
+  - Squawk codes reference
+
+Version 1.0 (Earlier)
+---------------------
+  - Initial release
+  - Basic ADS-B data collection
+  - Core tables: aircraft, flights, positions
+
+================================================================================
+SCHEMA OVERVIEW
+================================================================================
+
+Total Tables:        15
+Core Tables:         4  (aircraft, flights, positions, flight_routes)
+Archive Tables:      2  (flight_history, positions_backup)
+Reference Tables:    4  (airports, airlines, squawk_codes, alerts)
+Statistics Tables:   2  (daily_stats, coverage_stats)
+Management Tables:   3  (partition_operations, migration_status, fk_backup)
+
+Total Indexes:       47
+Total Constraints:   35
+Total Foreign Keys:  6
+Total Procedures:    6
+Total Functions:     1
+Total Views:         12+
+
+================================================================================
+CORE TABLES DETAILED
+================================================================================
+
+1. AIRCRAFT
+-----------
+Purpose: Master list of all aircraft detected
+Primary Key: icao_address (6-character ICAO 24-bit address)
+
+Columns:
+  icao_address        VARCHAR2(6)       - Unique aircraft identifier
+  registration        VARCHAR2(10)      - Tail number (e.g., N12345)
+  aircraft_type       VARCHAR2(50)      - Aircraft model (e.g., B738)
+  manufacturer        VARCHAR2(100)     - Manufacturer name
+  model               VARCHAR2(100)     - Full model name
+  operator            VARCHAR2(200)     - Owner/operator company
+  photo_url           VARCHAR2(500)     - Link to aircraft photo
+  first_seen          TIMESTAMP(6)      - First detection time
+  last_seen           TIMESTAMP(6)      - Most recent detection
+
+Indexes:
+  - Primary key on icao_address
+  - Index on last_seen for active aircraft queries
+
+Sample Query:
+  SELECT * FROM aircraft 
+  WHERE last_seen > SYSDATE - 1 
+  ORDER BY last_seen DESC;
+
+2. FLIGHTS
+----------
+Purpose: Individual flight sessions for each aircraft
+Primary Key: flight_id (auto-generated sequence)
+
+Columns:
+  flight_id           NUMBER            - Unique flight identifier
+  icao_address        VARCHAR2(6)       - FK to aircraft
+  callsign            VARCHAR2(10)      - Flight callsign (e.g., UAL123)
+  first_contact       TIMESTAMP(6)      - Flight start time
+  last_contact        TIMESTAMP(6)      - Flight end/last update
+
+Foreign Keys:
+  - icao_address -> aircraft(icao_address)
+
+Indexes:
+  - Primary key on flight_id
+  - Index on icao_address
+  - Index on callsign
+  - Composite index on (icao_address, last_contact)
+
+Sample Query:
+  SELECT f.*, a.registration, a.aircraft_type
+  FROM flights f
+  JOIN aircraft a ON f.icao_address = a.icao_address
+  WHERE f.last_contact > SYSDATE - (30/1440);
+
+3. POSITIONS (PARTITIONED)
+--------------------------
+Purpose: Position reports from ADS-B messages
+Primary Key: position_id (auto-generated sequence)
+Partitioning: RANGE by received_time (daily partitions)
+Retention: 14 days (automatic cleanup)
+
+Columns:
+  position_id         NUMBER            - Unique position identifier
+  flight_id           NUMBER            - FK to flights
+  icao_address        VARCHAR2(6)       - Aircraft identifier
+  msg_type            VARCHAR2(10)      - Message type (MSG)
+  transmission_type   NUMBER            - ADS-B transmission type (1-8)
+  reported_time       TIMESTAMP(6)      - Time from aircraft
+  received_time       TIMESTAMP(6)      - Time received by system
+  callsign            VARCHAR2(10)      - Flight callsign
+  altitude            NUMBER            - Altitude in feet
+  ground_speed        NUMBER            - Speed in knots
+  track               NUMBER            - Heading in degrees
+  latitude            NUMBER(10,6)      - Latitude coordinate
+  longitude           NUMBER(11,6)      - Longitude coordinate
+  vertical_rate       NUMBER            - Climb/descent rate (ft/min)
+  squawk              VARCHAR2(4)       - Transponder code
+  alert               NUMBER(1)         - Alert flag
+  emergency           NUMBER(1)         - Emergency flag
+  spi                 NUMBER(1)         - Special position flag
+  is_on_ground        NUMBER(1)         - Ground status
+  wind_speed          NUMBER            - Wind speed (future)
+  wind_direction      NUMBER            - Wind direction (future)
+  temperature         NUMBER            - Temperature (future)
+  barometric_pressure NUMBER            - Pressure (future)
+  signal_strength     NUMBER            - Reception strength (future)
+
+Partitioning Strategy:
+  - Daily partitions: POS_YYYYMMDD
+  - Automatic partition creation via job
+  - Automatic cleanup after 14 days
+  - INTERVAL partitioning with 1-day interval
+
+Foreign Keys:
+  - flight_id -> flights(flight_id)
+
+Indexes (LOCAL on partition key):
+  - Primary key on position_id
+  - Index on flight_id
+  - Index on icao_address
+  - Index on received_time
+  - Composite index on (latitude, longitude)
+
+Partition Management:
+  Procedure: manage_position_partitions
+  Schedule: Daily at 1:00 AM
+  Retention: Keep 14 days
+  
+Sample Queries:
+  -- Current positions (today's partition only)
+  SELECT * FROM positions
+  WHERE received_time > TRUNC(SYSDATE)
+  ORDER BY received_time DESC;
+  
+  -- Check partition info
+  SELECT partition_name, high_value, num_rows
+  FROM user_tab_partitions
+  WHERE table_name = 'POSITIONS'
+  ORDER BY partition_position DESC;
+
+4. FLIGHT_ROUTES
+----------------
+Purpose: Detected departure/arrival airports
+Primary Key: route_id (auto-generated sequence)
+
+Columns:
+  route_id            NUMBER            - Unique route identifier
+  flight_id           NUMBER            - FK to flights
+  origin_airport_id   NUMBER            - FK to airports (departure)
+  dest_airport_id     NUMBER            - FK to airports (arrival)
+  actual_departure    TIMESTAMP(6)      - Takeoff time
+  estimated_arrival   TIMESTAMP(6)      - ETA
+  actual_arrival      TIMESTAMP(6)      - Landing time
+  route_distance_nm   NUMBER            - Great circle distance
+  created_date        TIMESTAMP(6)      - Record creation
+  last_updated        TIMESTAMP(6)      - Last update
+
+Foreign Keys:
+  - origin_airport_id -> airports(airport_id)
+  - dest_airport_id -> airports(airport_id)
+
+Triggers:
+  - trg_flight_routes_update: Auto-updates last_updated
+
+Indexes:
+  - Primary key on route_id
+  - Index on flight_id
+  - Index on origin_airport_id
+  - Index on dest_airport_id
+  - Index on actual_departure
+
+Sample Query:
+  SELECT 
+    fr.*,
+    origin.icao_code as origin,
+    dest.icao_code as destination
+  FROM flight_routes fr
+  LEFT JOIN airports origin ON fr.origin_airport_id = origin.airport_id
+  LEFT JOIN airports dest ON fr.dest_airport_id = dest.airport_id
+  WHERE fr.actual_departure > SYSDATE - 1;
+
+================================================================================
+ARCHIVE TABLES
+================================================================================
+
+5. FLIGHT_HISTORY
+-----------------
+Purpose: Archive of completed flights with statistics
+Primary Key: history_id (auto-generated sequence)
+
+Columns:
+  history_id          NUMBER            - Unique archive identifier
+  flight_id           NUMBER            - Original flight_id
+  icao_address        VARCHAR2(6)       - Aircraft identifier
+  callsign            VARCHAR2(10)      - Flight callsign
+  
+  -- Time information
+  first_contact       TIMESTAMP(6)      - Flight start
+  last_contact        TIMESTAMP(6)      - Flight end
+  flight_duration_min NUMBER            - Duration in minutes
+  
+  -- Aircraft details
+  registration        VARCHAR2(10)      - Tail number
+  aircraft_type       VARCHAR2(50)      - Aircraft model
+  manufacturer        VARCHAR2(100)     - Manufacturer
+  operator            VARCHAR2(200)     - Operator
+  
+  -- Statistics
+  total_positions     NUMBER            - Position count
+  positions_with_coords NUMBER          - Valid coordinate count
+  max_altitude        NUMBER            - Highest altitude (ft)
+  min_altitude        NUMBER            - Lowest altitude (ft)
+  avg_altitude        NUMBER            - Average altitude (ft)
+  max_speed           NUMBER            - Max ground speed (kts)
+  avg_speed           NUMBER            - Average speed (kts)
+  
+  -- Distance metrics
+  max_distance_nm     NUMBER            - Furthest from receiver
+  total_distance_nm   NUMBER            - Total distance traveled
+  
+  -- Route information
+  origin_airport_id   NUMBER            - Departure airport FK
+  dest_airport_id     NUMBER            - Arrival airport FK
+  origin_icao         VARCHAR2(4)       - Origin ICAO code
+  dest_icao           VARCHAR2(4)       - Destination ICAO code
+  route_distance_nm   NUMBER            - Route distance
+  
+  -- Metadata
+  archived_date       TIMESTAMP(6)      - When archived
+  archive_reason      VARCHAR2(50)      - Reason code
+
+Archive Reasons:
+  - 'STALE': No updates for 30+ minutes
+  - 'LANDED': Detected landing at destination
+  - 'OUT_OF_RANGE': Left coverage area
+
+Foreign Keys:
+  - icao_address -> aircraft(icao_address)
+
+Indexes:
+  - Primary key on history_id
+  - Index on icao_address
+  - Index on callsign
+  - Index on archived_date
+  - Index on origin_airport_id
+  - Index on dest_airport_id
+
+Sample Query:
+  SELECT 
+    callsign,
+    origin_icao || ' → ' || dest_icao as route,
+    flight_duration_min,
+    max_altitude,
+    total_distance_nm
+  FROM flight_history
+  WHERE archived_date > SYSDATE - 7
+  ORDER BY archived_date DESC;
+
+6. FLIGHT_NOTIFICATIONS
+------------------------
+Purpose: Queue for flight-related notifications
+Primary Key: notification_id (auto-generated sequence)
+
+Columns:
+  notification_id     NUMBER            - Unique identifier
+  flight_id           NUMBER            - Related flight
+  icao_address        VARCHAR2(6)       - Aircraft identifier
+  callsign            VARCHAR2(10)      - Flight callsign
+  notification_type   VARCHAR2(20)      - Type of notification
+  notification_text   VARCHAR2(500)     - Message text
+  duration_minutes    NUMBER            - Flight duration
+  max_altitude        NUMBER            - Max altitude
+  origin_airport      VARCHAR2(50)      - Departure airport name
+  dest_airport        VARCHAR2(50)      - Arrival airport name
+  created_date        TIMESTAMP(6)      - When created
+  sent_date           TIMESTAMP(6)      - When sent
+  sent_status         VARCHAR2(20)      - Status
+
+Notification Types:
+  - 'FLIGHT_ENDED': Flight completed
+  - 'ROUTE_COMPLETED': Full route detected
+  - 'ALERT_TRIGGERED': Custom alert fired
+
+Sent Status:
+  - 'PENDING': Not yet sent
+  - 'SENT': Successfully delivered
+  - 'FAILED': Delivery failed
+
+Indexes:
+  - Primary key on notification_id
+  - Index on sent_status
+  - Index on notification_type
+  - Index on created_date
+
+Sample Query:
+  SELECT * FROM flight_notifications
+  WHERE sent_status = 'PENDING'
+  ORDER BY created_date;
+
+================================================================================
+REFERENCE TABLES
+================================================================================
+
+7. AIRPORTS
+-----------
+Purpose: Airport reference data (7000+ airports)
+Primary Key: airport_id (auto-generated sequence)
+Unique: icao_code
+
+Columns:
+  airport_id          NUMBER            - Unique identifier
+  icao_code           VARCHAR2(4)       - ICAO code (e.g., KDFW)
+  iata_code           VARCHAR2(3)       - IATA code (e.g., DFW)
+  airport_name        VARCHAR2(200)     - Full name
+  city                VARCHAR2(100)     - City name
+  country             VARCHAR2(50)      - Country name
+  latitude            NUMBER(10,6)      - Latitude
+  longitude           NUMBER(11,6)      - Longitude
+  elevation           NUMBER            - Elevation (meters)
+  elevation_ft        NUMBER            - Elevation (feet)
+  timezone            VARCHAR2(50)      - Timezone
+
+Indexes:
+  - Primary key on airport_id
+  - Unique index on icao_code
+  - Index on iata_code
+  - Composite index on (latitude, longitude)
+
+Data Source: OurAirports.com
+Populated by: populate_airports.py
+
+8. AIRLINES
+-----------
+Purpose: Airline callsign prefix lookup
+Primary Key: airline_id (auto-generated sequence)
+Unique: callsign_prefix
+
+Columns:
+  airline_id          NUMBER            - Unique identifier
+  callsign_prefix     VARCHAR2(3)       - 3-letter prefix (e.g., UAL)
+  airline_name        VARCHAR2(100)     - Full airline name
+  iata_code           VARCHAR2(2)       - IATA code (e.g., UA)
+  icao_code           VARCHAR2(3)       - ICAO code (e.g., UAL)
+  country             VARCHAR2(50)      - Country
+  is_active           NUMBER(1)         - Active flag
+  created_date        TIMESTAMP(6)      - Creation time
+
+Data Source: Manual entry
+Populated by: populate_airports.py (300+ airlines)
+
+9. SQUAWK_CODES
+---------------
+Purpose: Transponder code reference
+Primary Key: squawk_code
+
+Columns:
+  squawk_code         VARCHAR2(4)       - 4-digit code
+  description         VARCHAR2(200)     - Meaning
+  category            VARCHAR2(20)      - Category
+  priority            NUMBER(1)         - Priority level
+
+Important Codes:
+  7700 - General Emergency
+  7600 - Radio Failure
+  7500 - Hijacking
+  1200 - VFR
+  Various military codes
+
+10. ALERTS
+----------
+Purpose: Alert rule configuration
+Primary Key: alert_id (auto-generated sequence)
+
+Columns:
+  alert_id            NUMBER            - Unique identifier
+  alert_type          VARCHAR2(20)      - Type (ICAO, CALLSIGN, etc.)
+  alert_value         VARCHAR2(50)      - Match value
+  alert_name          VARCHAR2(100)     - Display name
+  notification_email  VARCHAR2(100)     - Email for notifications
+  notification_enabled NUMBER(1)        - Enable flag
+  is_active           NUMBER(1)         - Active flag
+  created_date        TIMESTAMP(6)      - Creation time
+  last_triggered      TIMESTAMP(6)      - Last trigger time
+
+Alert Types:
+  - ICAO: Match specific aircraft
+  - CALLSIGN: Match flight callsign
+  - SQUAWK: Match transponder code
+  - ALTITUDE: Altitude threshold (>45000, <1000)
+
+11. ALERT_HISTORY
+-----------------
+Purpose: Log of triggered alerts
+Primary Key: history_id (auto-generated sequence)
+
+Columns:
+  history_id          NUMBER            - Unique identifier
+  alert_id            NUMBER            - FK to alerts
+  flight_id           NUMBER            - FK to flights
+  icao_address        VARCHAR2(6)       - Aircraft
+  callsign            VARCHAR2(10)      - Callsign
+  triggered_time      TIMESTAMP(6)      - When triggered
+  altitude            NUMBER            - Altitude at trigger
+  latitude            NUMBER(10,6)      - Position at trigger
+  longitude           NUMBER(11,6)      - Position at trigger
+
+Foreign Keys:
+  - alert_id -> alerts(alert_id) ON DELETE CASCADE
+  - flight_id -> flights(flight_id) ON DELETE CASCADE
+
+================================================================================
+STATISTICS TABLES
+================================================================================
+
+12. DAILY_STATS
+---------------
+Purpose: Daily aggregated statistics
+Primary Key: stat_date
+
+Columns:
+  stat_date           DATE              - Statistics date
+  total_aircraft      NUMBER            - Unique aircraft count
+  total_flights       NUMBER            - Flight count
+  total_positions     NUMBER            - Position count
+  peak_aircraft_count NUMBER            - Max simultaneous aircraft
+  peak_aircraft_time  TIMESTAMP(6)      - Time of peak
+  most_common_type    VARCHAR2(50)      - Most common aircraft type
+  most_common_aircraft_type VARCHAR2(50) - Duplicate column
+  total_distance_tracked NUMBER         - Estimated distance
+  unique_callsigns    NUMBER            - Unique callsign count
+  avg_altitude        NUMBER            - Average altitude
+  max_altitude        NUMBER            - Maximum altitude
+  created_date        TIMESTAMP(6)      - Record creation
+
+Populated by: update_daily_stats.py
+
+13. COVERAGE_STATS
+------------------
+Purpose: Hourly reception statistics
+Primary Key: stat_id
+Unique: (stat_date, stat_hour)
+
+Columns:
+  stat_id             NUMBER            - Unique identifier
+  stat_date           DATE              - Date
+  stat_hour           NUMBER(2)         - Hour (0-23)
+  aircraft_count      NUMBER            - Aircraft in hour
+  message_count       NUMBER            - Message count
+  avg_altitude        NUMBER            - Average altitude
+  max_distance        NUMBER            - Max distance
+  created_date        TIMESTAMP(6)      - Creation time
+
+================================================================================
+MANAGEMENT TABLES
+================================================================================
+
+14. PARTITION_OPERATIONS
+-------------------------
+Purpose: Track partition management operations
+Primary Key: operation_id (auto-generated sequence)
+
+Columns:
+  operation_id        NUMBER            - Unique identifier
+  operation_type      VARCHAR2(20)      - Type (CREATE, DROP, etc.)
+  partition_name      VARCHAR2(30)      - Partition affected
+  operation_date      TIMESTAMP(6)      - When performed
+  status              VARCHAR2(20)      - Success/failure
+  error_message       VARCHAR2(500)     - Error details
+  rows_affected       NUMBER            - Row count
+
+15. MIGRATION_STATUS
+--------------------
+Purpose: Track schema migrations
+Primary Key: migration_id (auto-generated sequence)
+
+Columns:
+  migration_id        NUMBER            - Unique identifier
+  migration_name      VARCHAR2(100)     - Migration description
+  started_at          TIMESTAMP(6)      - Start time
+  completed_at        TIMESTAMP(6)      - Completion time
+  status              VARCHAR2(20)      - Status
+  error_message       VARCHAR2(4000)    - Errors
+
+16. FK_BACKUP
+-------------
+Purpose: Backup of foreign key definitions
+Columns:
+  constraint_name     VARCHAR2(128)     - FK name
+  table_name          VARCHAR2(128)     - Table name
+  r_constraint_name   VARCHAR2(128)     - Referenced constraint
+  delete_rule         VARCHAR2(9)       - ON DELETE rule
+  status              VARCHAR2(8)       - Enabled/disabled
+
+17. POSITIONS_BACKUP
+--------------------
+Purpose: Safety backup before partition migration
+Structure: Same as positions table
+Usage: Temporary storage during migrations
+
+================================================================================
+STORED PROCEDURES
+================================================================================
+
+1. end_stale_flights(p_inactivity_minutes NUMBER)
+--------------------------------------------------
+Purpose: Archive flights with no recent activity
+Called by: Collector every 5 minutes
+Default: 30 minutes inactivity
+
+Process:
+  1. Find flights with no position updates
+  2. Call archive_flight for each
+  3. Update flight last_contact
+  4. Generate notifications
+
+2. archive_flight(p_flight_id NUMBER, p_reason VARCHAR2)
+---------------------------------------------------------
+Purpose: Archive single flight with full statistics
+Called by: end_stale_flights or manually
+
+Calculations:
+  - Flight duration
+  - Position statistics (count, altitude, speed)
+  - Distance from receiver (max)
+  - Total distance traveled
+  - Route information
+
+Output: flight_history record
+
+3. process_flight_notifications
+--------------------------------
+Purpose: Send pending notifications
+Status: Framework ready, needs integration
+
+Process:
+  1. Query PENDING notifications
+  2. Send via email/SMS/webhook
+  3. Mark as SENT or FAILED
+
+4. manage_position_partitions
+------------------------------
+Purpose: Automatic partition management
+Schedule: Daily at 1:00 AM
+
+Process:
+  1. Create tomorrow's partition if needed
+  2. Drop partitions older than 14 days
+  3. Log operations to partition_operations
+
+5. cleanup_old_positions(p_days NUMBER)
+----------------------------------------
+Purpose: Manual cleanup of old data
+Parameter: Days to retain
+
+6. update_daily_stats(p_date DATE)
+-----------------------------------
+Purpose: Calculate daily statistics
+Called by: Manual or scheduled
+
+================================================================================
+FUNCTIONS
+================================================================================
+
+1. calculate_distance_from_receiver(p_lat NUMBER, p_lon NUMBER) RETURN NUMBER
+------------------------------------------------------------------------------
+Purpose: Calculate distance from receiver using Haversine formula
+Returns: Distance in nautical miles
+Receiver: 32.7357, -97.1081 (Arlington, TX)
+
+Usage:
+  SELECT calculate_distance_from_receiver(33.9425, -118.4081) FROM dual;
+
+================================================================================
+KEY VIEWS
+================================================================================
+
+1. v_current_aircraft
+---------------------
+Shows aircraft detected in last 30 minutes with current positions
+
+2. v_recent_archived_flights
+-----------------------------
+Last 7 days of completed flights with route information
+
+3. v_aircraft_flight_stats
+---------------------------
+Per-aircraft statistics from archive
+
+4. v_popular_routes_archived
+-----------------------------
+Most common routes (last 30 days)
+
+5. v_daily_flight_statistics
+-----------------------------
+Daily aggregates from flight_history
+
+6. v_flight_routes
+------------------
+Current route information with airport details
+
+7. v_popular_routes_enhanced
+----------------------------
+Enhanced route statistics
+
+8. v_airport_traffic
+--------------------
+Airport traffic statistics (last 7 days)
+
+9. v_emergency_aircraft
+-----------------------
+Aircraft with emergency squawk codes (24 hours)
+
+10. v_aircraft_stats
+--------------------
+Comprehensive per-aircraft statistics
+
+11. v_hourly_traffic
+--------------------
+Hourly traffic patterns (last 7 days)
+
+12. v_flight_stats
+------------------
+Flight statistics with position counts
+
+================================================================================
+DATABASE JOBS
+================================================================================
+
+1. PARTITION_MANAGER_JOB
+------------------------
+Schedule: Daily at 01:00 AM
+Action: EXEC manage_position_partitions
+Purpose: Create new partitions, drop old ones
+
+2. FLIGHT_CLEANUP_JOB (Optional)
+---------------------------------
+Schedule: Every 5 minutes
+Action: EXEC end_stale_flights(30)
+Purpose: Archive stale flights
+Note: Normally called by collector
+
+3. PROCESS_NOTIFICATIONS_JOB (Optional)
+----------------------------------------
+Schedule: Every 10 minutes
+Action: EXEC process_flight_notifications
+Purpose: Send queued notifications
+
+4. STATS_GATHER_JOB
+-------------------
+Schedule: Daily at 02:00 AM
+Action: Gather table statistics
+Purpose: Maintain query performance
+
+================================================================================
+PERFORMANCE CHARACTERISTICS
+================================================================================
+
+Partition Strategy:
+  - Daily partitions limit query scan range
+  - 14-day retention prevents unbounded growth
+  - Local indexes on partition key
+  - Partition pruning automatic
+
+Expected Growth (Active System):
+  Positions: ~100,000 rows/day × 14 days = 1.4M rows
+  Flights: ~1,000 rows/day
+  Aircraft: Grows slowly (unique ICAO addresses)
+  Flight_history: ~1,000 rows/day (permanent archive)
+
+Storage Estimates:
+  Positions (14 days): ~200-500 MB
+  Flight_history (1 year): ~50-100 MB
+  Other tables: <50 MB combined
+
+Query Performance:
+  Current aircraft: <100ms (partition pruning)
+  Archive queries: <500ms (indexed)
+  Statistics: <1s (pre-aggregated)
+
+================================================================================
+BACKUP & RECOVERY
+================================================================================
+
+Critical Tables (Must Backup):
+  - aircraft (master data)
+  - airports (reference data)
+  - airlines (reference data)
+  - flight_history (permanent archive)
+  - daily_stats (aggregates)
+
+Transient Tables (Can Recreate):
+  - positions (14-day rolling window)
+  - flights (rebuilt from positions)
+  - flight_routes (rebuilt from positions)
+
+Export Commands:
+  expdp adsb_user/oracle@FREEPDB1 \
+    tables=aircraft,airports,airlines,flight_history,daily_stats \
+    directory=DATA_PUMP_DIR \
+    dumpfile=adsb_backup_%U.dmp \
+    parallel=4
+
+================================================================================
+UPGRADE PATH FROM VERSION 4.0
+================================================================================
+
+If upgrading from version 4.0 to 5.0:
+
+1. Backup current data
+2. Run enhanced_flight_cleanup.sql (adds flight_history, notifications)
+3. Run partition migration scripts
+4. Verify partition structure
+5. Update collector to adsb_collector_latest.py
+6. Test cleanup procedures
+
+See migration documentation for detailed steps.
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+Check Partition Health:
+  SELECT table_name, partition_name, num_rows, high_value
+  FROM user_tab_partitions
+  WHERE table_name = 'POSITIONS'
+  ORDER BY partition_position DESC;
+
+Check Invalid Objects:
+  SELECT object_name, object_type, status
+  FROM user_objects
+  WHERE status = 'INVALID';
+
+Check Procedure Errors:
+  SELECT name, type, line, text
+  FROM user_errors
+  ORDER BY name, sequence;
+
+Recompile Invalid Objects:
+  BEGIN
+    DBMS_UTILITY.COMPILE_SCHEMA('ADSB_USER');
+  END;
+  /
+
+================================================================================
+CONTACTS & REFERENCES
+================================================================================
+
+Schema Version: 5.0.0
+Last Updated: February 02, 2026
+Documentation: Enhanced_Flight_Cleanup_Guide.txt
+Python Scripts: adsb_collector_latest.py, adsb_webapp.py
+Route Detection: route_detector.py
+
+Related Files:
+  - enhanced_flight_cleanup.sql
+  - populate_airports.py
+  - update_daily_stats_minimal.py
+  - run_collector.sh
+
+================================================================================
+END OF SCHEMA DOCUMENTATION - VERSION 5.0
+================================================================================
