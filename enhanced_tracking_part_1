@@ -1,0 +1,139 @@
+-- ============================================================================
+-- FLIGHT IDENTIFICATION SYSTEM - ORA-00932 FIX (DATE ARITHMETIC)
+-- ============================================================================
+-- The error was caused by improper date arithmetic syntax
+-- Changed: SYSDATE - (30/1440)  
+-- To:      SYSTIMESTAMP - INTERVAL '30' MINUTE
+-- ============================================================================
+
+-- Drop views if they exist
+BEGIN
+    EXECUTE IMMEDIATE 'DROP VIEW v_current_flights_enhanced CASCADE CONSTRAINTS';
+EXCEPTION
+    WHEN OTHERS THEN NULL;
+END;
+/
+
+BEGIN
+    EXECUTE IMMEDIATE 'DROP VIEW v_latest_positions';
+EXCEPTION
+    WHEN OTHERS THEN NULL;
+END;
+/
+
+-- Create intermediate view for latest positions
+CREATE OR REPLACE VIEW v_latest_positions AS
+SELECT 
+    flight_id,
+    MAX(altitude) KEEP (DENSE_RANK LAST ORDER BY received_time) as altitude,
+    MAX(ground_speed) KEEP (DENSE_RANK LAST ORDER BY received_time) as ground_speed,
+    MAX(track) KEEP (DENSE_RANK LAST ORDER BY received_time) as track,
+    MAX(latitude) KEEP (DENSE_RANK LAST ORDER BY received_time) as latitude,
+    MAX(longitude) KEEP (DENSE_RANK LAST ORDER BY received_time) as longitude,
+    MAX(received_time) as received_time
+FROM positions
+WHERE received_time > SYSTIMESTAMP - INTERVAL '30' MINUTE
+GROUP BY flight_id;
+
+COMMENT ON VIEW v_latest_positions IS 'Latest position for each active flight using KEEP DENSE_RANK';
+
+-- Now create the main view with proper date arithmetic
+CREATE OR REPLACE VIEW v_current_flights_enhanced AS
+SELECT 
+    f.flight_id,
+    f.icao_address,
+    f.callsign,
+    
+    -- Parse airline from callsign
+    SUBSTR(f.callsign, 1, 3) as callsign_prefix,
+    
+    -- Extract flight number from callsign  
+    REGEXP_SUBSTR(f.callsign, '[0-9]+') as flight_number,
+    
+    -- Get airline name from airlines table
+    al.airline_name,
+    al.iata_code as airline_iata,
+    al.icao_code as airline_icao,
+    al.country as airline_country,
+    
+    -- Aircraft information
+    a.registration,
+    a.aircraft_type,
+    a.manufacturer,
+    a.operator,
+    
+    -- Position data from helper view
+    lp.altitude,
+    lp.ground_speed,
+    lp.track,
+    lp.latitude,
+    lp.longitude,
+    lp.received_time,
+    
+    -- Route information if available
+    fr.origin_airport_id,
+    fr.dest_airport_id,
+    origin.icao_code as origin_icao,
+    origin.iata_code as origin_iata,
+    origin.airport_name as origin_name,
+    origin.city as origin_city,
+    dest.icao_code as dest_icao,
+    dest.iata_code as dest_iata,
+    dest.airport_name as dest_name,
+    dest.city as dest_city,
+    fr.actual_departure,
+    fr.estimated_arrival,
+    
+    -- Time information
+    f.first_contact,
+    f.last_contact,
+    ROUND(EXTRACT(DAY FROM (SYSTIMESTAMP - f.last_contact)) * 1440 +
+          EXTRACT(HOUR FROM (SYSTIMESTAMP - f.last_contact)) * 60 +
+          EXTRACT(MINUTE FROM (SYSTIMESTAMP - f.last_contact)) +
+          EXTRACT(SECOND FROM (SYSTIMESTAMP - f.last_contact)) / 60, 1) as minutes_since_update
+    
+FROM flights f
+JOIN aircraft a ON f.icao_address = a.icao_address
+LEFT JOIN v_latest_positions lp ON f.flight_id = lp.flight_id
+LEFT JOIN airlines al ON SUBSTR(f.callsign, 1, 3) = al.callsign_prefix
+LEFT JOIN flight_routes fr ON f.flight_id = fr.flight_id
+LEFT JOIN airports origin ON fr.origin_airport_id = origin.airport_id
+LEFT JOIN airports dest ON fr.dest_airport_id = dest.airport_id
+
+WHERE f.last_contact > SYSTIMESTAMP - INTERVAL '30' MINUTE
+  AND lp.flight_id IS NOT NULL;
+
+COMMENT ON VIEW v_current_flights_enhanced IS 
+'Current flights with airline identification - uses INTERVAL syntax for proper date arithmetic';
+
+-- Test the views
+PROMPT
+PROMPT ============================================================================
+PROMPT Testing v_latest_positions...
+PROMPT ============================================================================
+SELECT COUNT(*) as position_count FROM v_latest_positions;
+
+PROMPT
+PROMPT ============================================================================
+PROMPT Testing v_current_flights_enhanced...
+PROMPT ============================================================================
+SELECT COUNT(*) as flight_count FROM v_current_flights_enhanced;
+
+PROMPT
+PROMPT ============================================================================
+PROMPT SUCCESS! Views created without errors.
+PROMPT ============================================================================
+PROMPT
+PROMPT Sample queries:
+PROMPT   
+PROMPT   -- View current flights with airline info
+PROMPT   SELECT callsign, airline_name, flight_number, altitude, ground_speed
+PROMPT   FROM v_current_flights_enhanced
+PROMPT   ORDER BY callsign
+PROMPT   FETCH FIRST 10 ROWS ONLY;
+PROMPT
+PROMPT   -- View latest positions
+PROMPT   SELECT flight_id, altitude, latitude, longitude, received_time
+PROMPT   FROM v_latest_positions
+PROMPT   FETCH FIRST 10 ROWS ONLY;
+PROMPT
