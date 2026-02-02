@@ -1,0 +1,342 @@
+================================================================================
+ADSB FLIGHT TRACKER SCHEMA 5.0 - QUICK REFERENCE CARD
+================================================================================
+
+📋 CORE TABLES
+--------------
+aircraft          Master aircraft list (ICAO addresses)
+flights           Individual flight sessions
+positions         Position reports (PARTITIONED - 14 days)
+flight_routes     Detected departure/arrival airports
+
+📦 ARCHIVE TABLES
+-----------------
+flight_history        Completed flights with full statistics
+flight_notifications  Notification queue (PENDING/SENT/FAILED)
+positions_backup      Safety backup for migrations
+
+📚 REFERENCE DATA
+-----------------
+airports         7000+ airports worldwide (OurAirports)
+airlines         300+ airline callsign prefixes
+squawk_codes     Transponder code reference
+alerts           Alert rule configuration
+alert_history    Triggered alert log
+
+📊 STATISTICS
+-------------
+daily_stats      Daily aggregated metrics
+coverage_stats   Hourly reception statistics
+
+⚙️ MANAGEMENT
+--------------
+partition_operations   Partition management log
+migration_status       Schema migration tracking
+fk_backup             Foreign key backup
+
+================================================================================
+KEY PROCEDURES
+================================================================================
+
+🔧 Flight Lifecycle
+-------------------
+end_stale_flights(30)              Archive inactive flights (30 min)
+archive_flight(flight_id, reason)  Archive with statistics
+process_flight_notifications       Send queued notifications
+
+📊 Maintenance
+--------------
+manage_position_partitions         Create/drop daily partitions
+cleanup_old_positions(days)        Manual cleanup
+update_daily_stats(date)           Calculate daily stats
+
+📏 Utilities
+------------
+calculate_distance_from_receiver(lat,lon)  Distance in NM
+
+================================================================================
+CRITICAL VIEWS
+================================================================================
+
+✈️ Active Data
+--------------
+v_current_aircraft           Last 30 min activity
+v_flight_routes             Current routes with airports
+v_emergency_aircraft        Emergency squawks (24 hrs)
+
+📈 Statistics
+-------------
+v_aircraft_flight_stats     Per-aircraft totals
+v_daily_flight_statistics   Daily trends
+v_hourly_traffic           Hourly patterns
+
+🛫 Routes
+---------
+v_popular_routes_archived   Common routes (30 days)
+v_recent_archived_flights   Last 7 days completed
+v_airport_traffic          Traffic by airport (7 days)
+
+================================================================================
+PARTITION INFO
+================================================================================
+
+Table:      POSITIONS
+Strategy:   RANGE partitioning by received_time
+Interval:   1 day
+Naming:     POS_YYYYMMDD
+Retention:  14 days
+Auto-drop:  Yes (daily at 1 AM)
+Job:        PARTITION_MANAGER_JOB
+
+View partitions:
+  SELECT partition_name, high_value, num_rows
+  FROM user_tab_partitions
+  WHERE table_name = 'POSITIONS'
+  ORDER BY partition_position DESC;
+
+Current partition:
+  SELECT COUNT(*) FROM positions PARTITION (POS_20260202);
+
+================================================================================
+QUICK QUERIES
+================================================================================
+
+🔍 Active Flights Now
+----------------------
+SELECT * FROM v_current_aircraft;
+
+📊 Today's Statistics
+---------------------
+SELECT * FROM daily_stats 
+WHERE stat_date = TRUNC(SYSDATE);
+
+🛫 Recent Completed Flights
+----------------------------
+SELECT callsign, origin_icao, dest_icao, flight_duration_min
+FROM flight_history
+WHERE archived_date > SYSDATE - 1
+ORDER BY archived_date DESC;
+
+⚠️ Pending Notifications
+-------------------------
+SELECT * FROM flight_notifications
+WHERE sent_status = 'PENDING';
+
+🚨 Emergency Aircraft (24h)
+----------------------------
+SELECT * FROM v_emergency_aircraft;
+
+📈 Popular Routes
+-----------------
+SELECT * FROM v_popular_routes_archived
+ORDER BY flight_count DESC
+FETCH FIRST 10 ROWS ONLY;
+
+🏢 Busiest Airports
+-------------------
+SELECT * FROM v_airport_traffic
+ORDER BY total_traffic_7days DESC
+FETCH FIRST 10 ROWS ONLY;
+
+================================================================================
+MAINTENANCE COMMANDS
+================================================================================
+
+🔧 Run Cleanup Now
+------------------
+SET SERVEROUTPUT ON
+EXEC end_stale_flights(30);
+
+📊 Update Today's Stats
+------------------------
+EXEC update_daily_stats(TRUNC(SYSDATE));
+
+💌 Process Notifications
+-------------------------
+EXEC process_flight_notifications;
+
+🗂️ Manage Partitions
+---------------------
+EXEC manage_position_partitions;
+
+📈 Gather Statistics
+--------------------
+BEGIN
+  DBMS_STATS.GATHER_TABLE_STATS('ADSB_USER', 'POSITIONS');
+  DBMS_STATS.GATHER_TABLE_STATS('ADSB_USER', 'FLIGHT_HISTORY');
+END;
+/
+
+================================================================================
+JOBS STATUS
+================================================================================
+
+View all jobs:
+  SELECT job_name, enabled, state, next_run_date
+  FROM user_scheduler_jobs
+  WHERE job_name LIKE '%FLIGHT%' OR job_name LIKE '%PARTITION%'
+  ORDER BY job_name;
+
+View job history:
+  SELECT job_name, log_date, status, run_duration
+  FROM user_scheduler_job_run_details
+  WHERE job_name = 'PARTITION_MANAGER_JOB'
+  ORDER BY log_date DESC
+  FETCH FIRST 10 ROWS ONLY;
+
+================================================================================
+TABLE SIZES
+================================================================================
+
+SELECT 
+  table_name,
+  num_rows,
+  ROUND(blocks * 8192 / 1024 / 1024, 2) as size_mb
+FROM user_tables
+WHERE table_name IN ('POSITIONS', 'FLIGHTS', 'AIRCRAFT', 'FLIGHT_HISTORY')
+ORDER BY blocks DESC;
+
+================================================================================
+HEALTH CHECKS
+================================================================================
+
+✅ Check Invalid Objects
+-------------------------
+SELECT object_name, object_type, status
+FROM user_objects
+WHERE status != 'VALID';
+
+Should return: No rows
+
+✅ Check Partition Count
+-------------------------
+SELECT COUNT(*) as partition_count
+FROM user_tab_partitions
+WHERE table_name = 'POSITIONS';
+
+Should be: ~14-15 partitions
+
+✅ Check Foreign Keys
+---------------------
+SELECT constraint_name, table_name, status
+FROM user_constraints
+WHERE constraint_type = 'R'
+  AND status != 'ENABLED';
+
+Should return: No rows
+
+✅ Check Today's Data
+---------------------
+SELECT COUNT(*) as positions_today
+FROM positions
+WHERE received_time > TRUNC(SYSDATE);
+
+Should be: Growing number
+
+================================================================================
+TROUBLESHOOTING
+================================================================================
+
+⚠️ No data in positions
+------------------------
+1. Check collector is running
+2. Verify today's partition exists:
+   SELECT * FROM user_tab_partitions 
+   WHERE table_name = 'POSITIONS' 
+   AND partition_name = 'POS_' || TO_CHAR(SYSDATE, 'YYYYMMDD');
+
+⚠️ Procedure errors
+--------------------
+1. Check compilation:
+   SELECT * FROM user_errors WHERE name = 'END_STALE_FLIGHTS';
+2. Recompile:
+   ALTER PROCEDURE end_stale_flights COMPILE;
+
+⚠️ Partition job failed
+------------------------
+1. Check job log:
+   SELECT * FROM partition_operations ORDER BY operation_date DESC;
+2. Run manually:
+   EXEC manage_position_partitions;
+
+⚠️ Slow queries
+----------------
+1. Check statistics are current:
+   SELECT table_name, last_analyzed
+   FROM user_tables
+   WHERE table_name IN ('POSITIONS', 'FLIGHTS');
+2. Regather if needed:
+   EXEC DBMS_STATS.GATHER_TABLE_STATS('ADSB_USER', 'POSITIONS');
+
+================================================================================
+CONNECTION INFO
+================================================================================
+
+Database: Oracle 23ai Free (FREEPDB1)
+User:     adsb_user
+Password: oracle
+Host:     localhost
+Port:     1522
+
+Docker:   docker exec -it ora23c sqlplus adsb_user/oracle@FREEPDB1
+
+Python:   
+  import oracledb
+  conn = oracledb.connect(
+    user='adsb_user',
+    password='oracle',
+    dsn='localhost:1522/FREEPDB1'
+  )
+
+================================================================================
+VERSION NOTES
+================================================================================
+
+Version: 5.0.0
+Date:    February 02, 2026
+
+Major Features:
+  ✅ Daily partitioned positions table
+  ✅ Automatic 14-day retention
+  ✅ Flight history archiving
+  ✅ Distance calculations
+  ✅ Notification queue
+  ✅ Enhanced statistics
+
+Breaking Changes from 4.0:
+  - Positions table now partitioned
+  - New tables: flight_history, flight_notifications
+  - New procedure: end_stale_flights
+  - Collector must use adsb_collector_latest.py
+
+Upgrade Required:
+  - Run enhanced_flight_cleanup.sql
+  - Run partition migration
+  - Update Python scripts
+
+================================================================================
+SUPPORT FILES
+================================================================================
+
+📄 Documentation
+----------------
+Schema_Version_5.0_Documentation.txt  Full schema reference
+Enhanced_Flight_Cleanup_Guide.txt     Cleanup system guide
+Alert_Management_Guide.pdf            Alert configuration
+
+💾 SQL Scripts
+--------------
+enhanced_flight_cleanup.sql           Flight archiving system
+ADSB_Schema_2026-02-02               Full schema export
+
+🐍 Python Scripts
+-----------------
+adsb_collector_latest.py              Data collector (with cleanup)
+adsb_webapp.py                        Web interface
+route_detector.py                     Route detection
+populate_airports.py                  Airport data loader
+update_daily_stats_minimal.py        Statistics calculator
+
+================================================================================
+END OF QUICK REFERENCE
+================================================================================
