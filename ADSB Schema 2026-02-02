@@ -1,0 +1,2148 @@
+--------------------------------------------------------
+--  File created - Monday-February-02-2026   
+--------------------------------------------------------
+--------------------------------------------------------
+--  DDL for Table AIRCRAFT
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."AIRCRAFT" 
+   (	"ICAO_ADDRESS" VARCHAR2(6 BYTE), 
+	"REGISTRATION" VARCHAR2(10 BYTE), 
+	"AIRCRAFT_TYPE" VARCHAR2(50 BYTE), 
+	"FIRST_SEEN" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"LAST_SEEN" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"PHOTO_URL" VARCHAR2(500 BYTE), 
+	"MANUFACTURER" VARCHAR2(100 BYTE), 
+	"MODEL" VARCHAR2(100 BYTE), 
+	"OPERATOR" VARCHAR2(200 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table AIRLINES
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."AIRLINES" 
+   (	"AIRLINE_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"CALLSIGN_PREFIX" VARCHAR2(3 BYTE), 
+	"AIRLINE_NAME" VARCHAR2(100 BYTE), 
+	"IATA_CODE" VARCHAR2(2 BYTE), 
+	"ICAO_CODE" VARCHAR2(3 BYTE), 
+	"COUNTRY" VARCHAR2(50 BYTE), 
+	"IS_ACTIVE" NUMBER(1,0) DEFAULT 1, 
+	"CREATED_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table AIRPORTS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."AIRPORTS" 
+   (	"AIRPORT_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"ICAO_CODE" VARCHAR2(4 BYTE), 
+	"IATA_CODE" VARCHAR2(3 BYTE), 
+	"AIRPORT_NAME" VARCHAR2(200 BYTE), 
+	"CITY" VARCHAR2(100 BYTE), 
+	"COUNTRY" VARCHAR2(50 BYTE), 
+	"LATITUDE" NUMBER(10,6), 
+	"LONGITUDE" NUMBER(11,6), 
+	"ELEVATION" NUMBER, 
+	"TIMEZONE" VARCHAR2(50 BYTE), 
+	"ELEVATION_FT" NUMBER
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table ALERTS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."ALERTS" 
+   (	"ALERT_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"ALERT_TYPE" VARCHAR2(20 BYTE), 
+	"ALERT_VALUE" VARCHAR2(50 BYTE), 
+	"ALERT_NAME" VARCHAR2(100 BYTE), 
+	"NOTIFICATION_EMAIL" VARCHAR2(100 BYTE), 
+	"NOTIFICATION_ENABLED" NUMBER(1,0) DEFAULT 1, 
+	"IS_ACTIVE" NUMBER(1,0) DEFAULT 1, 
+	"CREATED_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"LAST_TRIGGERED" TIMESTAMP (6)
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table ALERT_HISTORY
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."ALERT_HISTORY" 
+   (	"HISTORY_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"ALERT_ID" NUMBER, 
+	"FLIGHT_ID" NUMBER, 
+	"ICAO_ADDRESS" VARCHAR2(6 BYTE), 
+	"CALLSIGN" VARCHAR2(10 BYTE), 
+	"TRIGGERED_TIME" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"ALTITUDE" NUMBER, 
+	"LATITUDE" NUMBER(10,6), 
+	"LONGITUDE" NUMBER(11,6)
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table COVERAGE_STATS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."COVERAGE_STATS" 
+   (	"STAT_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"STAT_DATE" DATE, 
+	"STAT_HOUR" NUMBER(2,0), 
+	"AIRCRAFT_COUNT" NUMBER, 
+	"MESSAGE_COUNT" NUMBER, 
+	"AVG_ALTITUDE" NUMBER, 
+	"MAX_DISTANCE" NUMBER, 
+	"CREATED_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table DAILY_STATS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."DAILY_STATS" 
+   (	"STAT_DATE" DATE, 
+	"TOTAL_AIRCRAFT" NUMBER, 
+	"TOTAL_FLIGHTS" NUMBER, 
+	"TOTAL_POSITIONS" NUMBER, 
+	"PEAK_AIRCRAFT_COUNT" NUMBER, 
+	"PEAK_AIRCRAFT_TIME" TIMESTAMP (6), 
+	"MOST_COMMON_TYPE" VARCHAR2(50 BYTE), 
+	"CREATED_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"MOST_COMMON_AIRCRAFT_TYPE" VARCHAR2(50 BYTE), 
+	"TOTAL_DISTANCE_TRACKED" NUMBER, 
+	"UNIQUE_CALLSIGNS" NUMBER, 
+	"AVG_ALTITUDE" NUMBER, 
+	"MAX_ALTITUDE" NUMBER
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table FK_BACKUP
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."FK_BACKUP" 
+   (	"CONSTRAINT_NAME" VARCHAR2(128 BYTE), 
+	"TABLE_NAME" VARCHAR2(128 BYTE), 
+	"R_CONSTRAINT_NAME" VARCHAR2(128 BYTE), 
+	"DELETE_RULE" VARCHAR2(9 BYTE), 
+	"STATUS" VARCHAR2(8 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table FK_COLUMNS_BACKUP
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."FK_COLUMNS_BACKUP" 
+   (	"CONSTRAINT_NAME" VARCHAR2(128 BYTE), 
+	"TABLE_NAME" VARCHAR2(128 BYTE), 
+	"COLUMN_NAME" VARCHAR2(4000 BYTE), 
+	"POSITION" NUMBER, 
+	"REFERENCED_TABLE" VARCHAR2(128 BYTE), 
+	"REFERENCED_COLUMN" VARCHAR2(4000 BYTE)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table FLIGHTS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."FLIGHTS" 
+   (	"FLIGHT_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"ICAO_ADDRESS" VARCHAR2(6 BYTE), 
+	"CALLSIGN" VARCHAR2(10 BYTE), 
+	"FIRST_CONTACT" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"LAST_CONTACT" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"ENDED_TIME" TIMESTAMP (6), 
+	"IS_ACTIVE" NUMBER(1,0) DEFAULT 1
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table FLIGHT_HISTORY
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."FLIGHT_HISTORY" 
+   (	"HISTORY_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"FLIGHT_ID" NUMBER, 
+	"ICAO_ADDRESS" VARCHAR2(6 BYTE), 
+	"CALLSIGN" VARCHAR2(10 BYTE), 
+	"FIRST_CONTACT" TIMESTAMP (6), 
+	"LAST_CONTACT" TIMESTAMP (6), 
+	"FLIGHT_DURATION_MIN" NUMBER, 
+	"REGISTRATION" VARCHAR2(10 BYTE), 
+	"AIRCRAFT_TYPE" VARCHAR2(50 BYTE), 
+	"MANUFACTURER" VARCHAR2(100 BYTE), 
+	"OPERATOR" VARCHAR2(200 BYTE), 
+	"TOTAL_POSITIONS" NUMBER, 
+	"POSITIONS_WITH_COORDS" NUMBER, 
+	"MAX_ALTITUDE" NUMBER, 
+	"MIN_ALTITUDE" NUMBER, 
+	"AVG_ALTITUDE" NUMBER, 
+	"MAX_SPEED" NUMBER, 
+	"AVG_SPEED" NUMBER, 
+	"MAX_DISTANCE_NM" NUMBER, 
+	"TOTAL_DISTANCE_NM" NUMBER, 
+	"ORIGIN_AIRPORT_ID" NUMBER, 
+	"DEST_AIRPORT_ID" NUMBER, 
+	"ORIGIN_ICAO" VARCHAR2(4 BYTE), 
+	"DEST_ICAO" VARCHAR2(4 BYTE), 
+	"ROUTE_DISTANCE_NM" NUMBER, 
+	"ARCHIVED_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"ARCHIVE_REASON" VARCHAR2(50 BYTE)
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+
+   COMMENT ON TABLE "ADSB_USER"."FLIGHT_HISTORY"  IS 'Archive of completed flights with comprehensive statistics';
+--------------------------------------------------------
+--  DDL for Table FLIGHT_NOTIFICATIONS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."FLIGHT_NOTIFICATIONS" 
+   (	"NOTIFICATION_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"FLIGHT_ID" NUMBER, 
+	"ICAO_ADDRESS" VARCHAR2(6 BYTE), 
+	"CALLSIGN" VARCHAR2(10 BYTE), 
+	"NOTIFICATION_TYPE" VARCHAR2(20 BYTE), 
+	"NOTIFICATION_TEXT" VARCHAR2(500 BYTE), 
+	"DURATION_MINUTES" NUMBER, 
+	"MAX_ALTITUDE" NUMBER, 
+	"ORIGIN_AIRPORT" VARCHAR2(50 BYTE), 
+	"DEST_AIRPORT" VARCHAR2(50 BYTE), 
+	"CREATED_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"SENT_DATE" TIMESTAMP (6), 
+	"SENT_STATUS" VARCHAR2(20 BYTE) DEFAULT 'PENDING'
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+
+   COMMENT ON TABLE "ADSB_USER"."FLIGHT_NOTIFICATIONS"  IS 'Queue for flight-related notifications';
+--------------------------------------------------------
+--  DDL for Table FLIGHT_ROUTES
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."FLIGHT_ROUTES" 
+   (	"ROUTE_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"FLIGHT_ID" NUMBER, 
+	"ORIGIN_AIRPORT_ID" NUMBER, 
+	"DEST_AIRPORT_ID" NUMBER, 
+	"ACTUAL_DEPARTURE" TIMESTAMP (6), 
+	"ESTIMATED_ARRIVAL" TIMESTAMP (6), 
+	"ACTUAL_ARRIVAL" TIMESTAMP (6), 
+	"ROUTE_DISTANCE_NM" NUMBER, 
+	"CREATED_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"LAST_UPDATED" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+
+   COMMENT ON COLUMN "ADSB_USER"."FLIGHT_ROUTES"."ROUTE_ID" IS 'Primary key - auto-generated';
+   COMMENT ON COLUMN "ADSB_USER"."FLIGHT_ROUTES"."FLIGHT_ID" IS 'Foreign key to flights table';
+   COMMENT ON COLUMN "ADSB_USER"."FLIGHT_ROUTES"."ORIGIN_AIRPORT_ID" IS 'Foreign key to airports table - departure airport';
+   COMMENT ON COLUMN "ADSB_USER"."FLIGHT_ROUTES"."DEST_AIRPORT_ID" IS 'Foreign key to airports table - arrival airport';
+   COMMENT ON COLUMN "ADSB_USER"."FLIGHT_ROUTES"."ACTUAL_DEPARTURE" IS 'Timestamp when flight was first detected climbing from origin';
+   COMMENT ON COLUMN "ADSB_USER"."FLIGHT_ROUTES"."ESTIMATED_ARRIVAL" IS 'Calculated ETA based on current position and speed';
+   COMMENT ON COLUMN "ADSB_USER"."FLIGHT_ROUTES"."ACTUAL_ARRIVAL" IS 'Timestamp when flight landed (detected on ground at destination)';
+   COMMENT ON COLUMN "ADSB_USER"."FLIGHT_ROUTES"."ROUTE_DISTANCE_NM" IS 'Great circle distance between origin and destination in nautical miles';
+   COMMENT ON TABLE "ADSB_USER"."FLIGHT_ROUTES"  IS 'Flight route information linking flights to origin and destination airports';
+--------------------------------------------------------
+--  DDL for Table MIGRATION_STATUS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."MIGRATION_STATUS" 
+   (	"MIGRATION_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"MIGRATION_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"STEP_NUMBER" NUMBER, 
+	"STEP_NAME" VARCHAR2(200 BYTE), 
+	"STATUS" VARCHAR2(20 BYTE), 
+	"ROWS_PROCESSED" NUMBER, 
+	"ERROR_MESSAGE" VARCHAR2(4000 BYTE), 
+	"CAN_ROLLBACK" CHAR(1 BYTE) DEFAULT 'Y'
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table PARTITION_OPERATIONS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."PARTITION_OPERATIONS" 
+   (	"OPERATION_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"OPERATION_DATE" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"OPERATION_TYPE" VARCHAR2(50 BYTE), 
+	"PARTITION_NAME" VARCHAR2(128 BYTE), 
+	"TABLE_NAME" VARCHAR2(128 BYTE), 
+	"ROWS_AFFECTED" NUMBER, 
+	"STATUS" VARCHAR2(20 BYTE), 
+	"ERROR_MESSAGE" VARCHAR2(4000 BYTE), 
+	"EXECUTED_BY" VARCHAR2(128 BYTE) DEFAULT USER, 
+	"EXECUTION_TIME_SEC" NUMBER(10,2)
+   ) SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table POSITIONS
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."POSITIONS" 
+   (	"POSITION_ID" NUMBER GENERATED ALWAYS AS IDENTITY MINVALUE 1 MAXVALUE 9999999999999999999999999999 INCREMENT BY 1 START WITH 1 CACHE 20 NOORDER  NOCYCLE  NOKEEP  NOSCALE , 
+	"FLIGHT_ID" NUMBER, 
+	"ICAO_ADDRESS" VARCHAR2(6 BYTE), 
+	"MSG_TYPE" VARCHAR2(10 BYTE), 
+	"TRANSMISSION_TYPE" NUMBER, 
+	"REPORTED_TIME" TIMESTAMP (6), 
+	"RECEIVED_TIME" TIMESTAMP (6) DEFAULT CURRENT_TIMESTAMP, 
+	"CALLSIGN" VARCHAR2(10 BYTE), 
+	"ALTITUDE" NUMBER, 
+	"GROUND_SPEED" NUMBER, 
+	"TRACK" NUMBER, 
+	"LATITUDE" NUMBER(10,6), 
+	"LONGITUDE" NUMBER(11,6), 
+	"VERTICAL_RATE" NUMBER, 
+	"SQUAWK" VARCHAR2(4 BYTE), 
+	"ALERT" NUMBER(1,0), 
+	"EMERGENCY" NUMBER(1,0), 
+	"SPI" NUMBER(1,0), 
+	"IS_ON_GROUND" NUMBER(1,0), 
+	"WIND_SPEED" NUMBER, 
+	"WIND_DIRECTION" NUMBER, 
+	"TEMPERATURE" NUMBER, 
+	"BAROMETRIC_PRESSURE" NUMBER, 
+	"SIGNAL_STRENGTH" NUMBER
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS  LOGGING 
+  STORAGE(
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" 
+  PARTITION BY RANGE ("RECEIVED_TIME") INTERVAL (INTERVAL '1' DAY) STORE IN ("USERS") 
+ (PARTITION "P_INITIAL"  VALUES LESS THAN (TIMESTAMP' 2024-01-01 00:00:00') SEGMENT CREATION DEFERRED 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING 
+  STORAGE(
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" )  ENABLE ROW MOVEMENT ;
+--------------------------------------------------------
+--  DDL for Table POSITIONS_BACKUP
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."POSITIONS_BACKUP" 
+   (	"POSITION_ID" NUMBER, 
+	"FLIGHT_ID" NUMBER, 
+	"ICAO_ADDRESS" VARCHAR2(6 BYTE), 
+	"MSG_TYPE" VARCHAR2(10 BYTE), 
+	"TRANSMISSION_TYPE" NUMBER, 
+	"REPORTED_TIME" TIMESTAMP (6), 
+	"RECEIVED_TIME" TIMESTAMP (6), 
+	"CALLSIGN" VARCHAR2(10 BYTE), 
+	"ALTITUDE" NUMBER, 
+	"GROUND_SPEED" NUMBER, 
+	"TRACK" NUMBER, 
+	"LATITUDE" NUMBER(10,6), 
+	"LONGITUDE" NUMBER(11,6), 
+	"VERTICAL_RATE" NUMBER, 
+	"SQUAWK" VARCHAR2(4 BYTE), 
+	"ALERT" NUMBER(1,0), 
+	"EMERGENCY" NUMBER(1,0), 
+	"SPI" NUMBER(1,0), 
+	"IS_ON_GROUND" NUMBER(1,0), 
+	"WIND_SPEED" NUMBER, 
+	"WIND_DIRECTION" NUMBER, 
+	"TEMPERATURE" NUMBER, 
+	"BAROMETRIC_PRESSURE" NUMBER, 
+	"SIGNAL_STRENGTH" NUMBER
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 1 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Table SQUAWK_CODES
+--------------------------------------------------------
+
+  CREATE TABLE "ADSB_USER"."SQUAWK_CODES" 
+   (	"SQUAWK_CODE" VARCHAR2(4 BYTE), 
+	"DESCRIPTION" VARCHAR2(200 BYTE), 
+	"CATEGORY" VARCHAR2(20 BYTE), 
+	"PRIORITY" NUMBER(1,0)
+   ) SEGMENT CREATION IMMEDIATE 
+  PCTFREE 10 PCTUSED 40 INITRANS 8 MAXTRANS 255 
+ NOCOMPRESS LOGGING
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for View V_AIRCRAFT_FLIGHT_STATS
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_AIRCRAFT_FLIGHT_STATS" ("ICAO_ADDRESS", "REGISTRATION", "AIRCRAFT_TYPE", "MANUFACTURER", "OPERATOR", "TOTAL_FLIGHTS", "AVG_DURATION_MIN", "HIGHEST_ALTITUDE", "AVG_SPEED", "TOTAL_DISTANCE_TRACKED_NM", "FIRST_SEEN", "LAST_SEEN") AS 
+  SELECT 
+    a.icao_address,
+    a.registration,
+    a.aircraft_type,
+    a.manufacturer,
+    a.operator,
+    COUNT(fh.history_id) as total_flights,
+    ROUND(AVG(fh.flight_duration_min), 1) as avg_duration_min,
+    MAX(fh.max_altitude) as highest_altitude,
+    ROUND(AVG(fh.avg_speed), 0) as avg_speed,
+    SUM(fh.total_distance_nm) as total_distance_tracked_nm,
+    MIN(fh.first_contact) as first_seen,
+    MAX(fh.last_contact) as last_seen
+FROM aircraft a
+LEFT JOIN flight_history fh ON a.icao_address = fh.icao_address
+GROUP BY a.icao_address, a.registration, a.aircraft_type, a.manufacturer, a.operator
+HAVING COUNT(fh.history_id) > 0
+ORDER BY total_flights DESC
+;
+--------------------------------------------------------
+--  DDL for View V_AIRCRAFT_STATS
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_AIRCRAFT_STATS" ("ICAO_ADDRESS", "REGISTRATION", "AIRCRAFT_TYPE", "OPERATOR", "TOTAL_FLIGHTS", "TOTAL_POSITIONS", "MAX_ALTITUDE", "AVG_SPEED", "FIRST_SEEN", "LAST_SEEN") AS 
+  SELECT 
+    a.icao_address,
+    a.registration,
+    a.aircraft_type,
+    a.operator,
+    COUNT(DISTINCT f.flight_id) AS total_flights,
+    COUNT(p.position_id) AS total_positions,
+    MAX(p.altitude) AS max_altitude,
+    AVG(p.ground_speed) AS avg_speed,
+    MIN(a.first_seen) AS first_seen,
+    MAX(a.last_seen) AS last_seen
+FROM aircraft a
+LEFT JOIN flights f ON a.icao_address = f.icao_address
+LEFT JOIN positions p ON f.flight_id = p.flight_id
+GROUP BY a.icao_address, a.registration, a.aircraft_type, a.operator
+;
+--------------------------------------------------------
+--  DDL for View V_AIRPORT_DISTANCES
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_AIRPORT_DISTANCES" ("ICAO_CODE", "IATA_CODE", "AIRPORT_NAME", "CITY", "LATITUDE", "LONGITUDE") AS 
+  SELECT 
+    a.icao_code,
+    a.iata_code,
+    a.airport_name,
+    a.city,
+    a.latitude,
+    a.longitude
+FROM airports a
+;
+--------------------------------------------------------
+--  DDL for View V_AIRPORT_TRAFFIC
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_AIRPORT_TRAFFIC" ("AIRPORT_ID", "ICAO_CODE", "IATA_CODE", "AIRPORT_NAME", "CITY", "COUNTRY", "DEPARTURES_7DAYS", "ARRIVALS_7DAYS", "TOTAL_TRAFFIC_7DAYS") AS 
+  SELECT 
+    a.airport_id,
+    a.icao_code,
+    a.iata_code,
+    a.airport_name,
+    a.city,
+    a.country,
+    
+    -- Departures
+    (SELECT COUNT(DISTINCT fr.flight_id) 
+     FROM flight_routes fr 
+     WHERE fr.origin_airport_id = a.airport_id
+       AND fr.actual_departure > SYSDATE - 7) as departures_7days,
+    
+    -- Arrivals
+    (SELECT COUNT(DISTINCT fr.flight_id) 
+     FROM flight_routes fr 
+     WHERE fr.dest_airport_id = a.airport_id
+       AND fr.actual_departure > SYSDATE - 7) as arrivals_7days,
+    
+    -- Total traffic
+    (SELECT COUNT(DISTINCT fr.flight_id) 
+     FROM flight_routes fr 
+     WHERE (fr.origin_airport_id = a.airport_id OR fr.dest_airport_id = a.airport_id)
+       AND fr.actual_departure > SYSDATE - 7) as total_traffic_7days
+
+FROM airports a
+WHERE EXISTS (
+    SELECT 1 FROM flight_routes fr 
+    WHERE (fr.origin_airport_id = a.airport_id OR fr.dest_airport_id = a.airport_id)
+      AND fr.actual_departure > SYSDATE - 7
+)
+ORDER BY total_traffic_7days DESC
+;
+--------------------------------------------------------
+--  DDL for View V_CURRENT_AIRCRAFT
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_CURRENT_AIRCRAFT" ("ICAO_ADDRESS", "REGISTRATION", "AIRCRAFT_TYPE", "CALLSIGN", "ALTITUDE", "GROUND_SPEED", "TRACK", "LATITUDE", "LONGITUDE", "MINUTES_AGO", "ORIGIN_ICAO", "ORIGIN_IATA", "ORIGIN_NAME", "DEST_ICAO", "DEST_IATA", "DEST_NAME", "ACTUAL_DEPARTURE", "ESTIMATED_ARRIVAL") AS 
+  WITH latest_positions AS (
+    -- Get the most recent position (Type 3) for each flight
+    SELECT 
+        p.flight_id,
+        p.icao_address,
+        p.callsign,
+        p.latitude,
+        p.longitude,
+        p.altitude,
+        p.received_time,
+        p.position_id,
+        -- Get speed/track from THIS position if available
+        p.ground_speed as pos_speed,
+        p.track as pos_track,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.flight_id 
+            ORDER BY p.received_time DESC
+        ) as rn
+    FROM positions p
+    WHERE p.latitude IS NOT NULL
+      AND p.longitude IS NOT NULL
+      AND p.received_time > CURRENT_TIMESTAMP - INTERVAL '30' MINUTE
+),
+latest_velocity AS (
+    -- Get the most recent velocity data (Type 4) for each flight
+    SELECT 
+        p.flight_id,
+        p.ground_speed,
+        p.track,
+        p.received_time as velocity_time,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.flight_id 
+            ORDER BY p.received_time DESC
+        ) as rn
+    FROM positions p
+    WHERE p.ground_speed IS NOT NULL
+      AND p.track IS NOT NULL
+      AND p.received_time > CURRENT_TIMESTAMP - INTERVAL '30' MINUTE
+)
+SELECT 
+    lp.icao_address,
+    a.registration,
+    a.aircraft_type,
+    lp.callsign,
+    lp.altitude,
+    -- Use speed from position if available, otherwise use latest velocity data
+    COALESCE(lp.pos_speed, lv.ground_speed) as ground_speed,
+    -- Use track from position if available, otherwise use latest velocity data
+    COALESCE(lp.pos_track, lv.track) as track,
+    lp.latitude,
+    lp.longitude,
+    ROUND(
+        EXTRACT(DAY FROM (CURRENT_TIMESTAMP - lp.received_time)) * 1440 +
+        EXTRACT(HOUR FROM (CURRENT_TIMESTAMP - lp.received_time)) * 60 +
+        EXTRACT(MINUTE FROM (CURRENT_TIMESTAMP - lp.received_time)) +
+        EXTRACT(SECOND FROM (CURRENT_TIMESTAMP - lp.received_time)) / 60,
+        1
+    ) as minutes_ago,
+    -- Route information
+    origin.icao_code as origin_icao,
+    origin.iata_code as origin_iata,
+    origin.airport_name as origin_name,
+    dest.icao_code as dest_icao,
+    dest.iata_code as dest_iata,
+    dest.airport_name as dest_name,
+    fr.actual_departure,
+    fr.estimated_arrival
+FROM latest_positions lp
+LEFT JOIN aircraft a ON lp.icao_address = a.icao_address
+LEFT JOIN latest_velocity lv ON lp.flight_id = lv.flight_id AND lv.rn = 1
+LEFT JOIN flights f ON lp.flight_id = f.flight_id
+LEFT JOIN flight_routes fr ON f.flight_id = fr.flight_id
+LEFT JOIN airports origin ON fr.origin_airport_id = origin.airport_id
+LEFT JOIN airports dest ON fr.dest_airport_id = dest.airport_id
+WHERE lp.rn = 1
+ORDER BY lp.received_time DESC
+;
+--------------------------------------------------------
+--  DDL for View V_CURRENT_ROUTES
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_CURRENT_ROUTES" ("FLIGHT_ID", "ICAO_ADDRESS", "CALLSIGN", "REGISTRATION", "AIRCRAFT_TYPE", "MANUFACTURER", "MODEL", "ORIGIN_AIRPORT_ID", "ORIGIN_ICAO", "ORIGIN_IATA", "ORIGIN_NAME", "ORIGIN_CITY", "ORIGIN_COUNTRY", "DEST_AIRPORT_ID", "DEST_ICAO", "DEST_IATA", "DEST_NAME", "DEST_CITY", "DEST_COUNTRY", "ACTUAL_DEPARTURE", "ESTIMATED_ARRIVAL", "ACTUAL_ARRIVAL", "ROUTE_DISTANCE_NM", "FIRST_CONTACT", "LAST_CONTACT", "TOTAL_POSITIONS", "MAX_ALTITUDE", "AVG_SPEED", "CURRENT_LAT", "CURRENT_LON", "CURRENT_ALTITUDE", "CURRENT_SPEED", "CURRENT_TRACK", "LAST_POSITION_TIME", "DISTANCE_TO_DEST_NM", "MINUTES_TO_DEST") AS 
+  SELECT 
+    vfr."FLIGHT_ID",vfr."ICAO_ADDRESS",vfr."CALLSIGN",vfr."REGISTRATION",vfr."AIRCRAFT_TYPE",vfr."MANUFACTURER",vfr."MODEL",vfr."ORIGIN_AIRPORT_ID",vfr."ORIGIN_ICAO",vfr."ORIGIN_IATA",vfr."ORIGIN_NAME",vfr."ORIGIN_CITY",vfr."ORIGIN_COUNTRY",vfr."DEST_AIRPORT_ID",vfr."DEST_ICAO",vfr."DEST_IATA",vfr."DEST_NAME",vfr."DEST_CITY",vfr."DEST_COUNTRY",vfr."ACTUAL_DEPARTURE",vfr."ESTIMATED_ARRIVAL",vfr."ACTUAL_ARRIVAL",vfr."ROUTE_DISTANCE_NM",vfr."FIRST_CONTACT",vfr."LAST_CONTACT",vfr."TOTAL_POSITIONS",vfr."MAX_ALTITUDE",vfr."AVG_SPEED",
+    p.latitude as current_lat,
+    p.longitude as current_lon,
+    p.altitude as current_altitude,
+    p.ground_speed as current_speed,
+    p.track as current_track,
+    p.received_time as last_position_time,
+    
+    -- Calculate distance remaining to destination
+    CASE 
+        WHEN vfr.dest_airport_id IS NOT NULL
+         AND p.latitude IS NOT NULL 
+         AND p.longitude IS NOT NULL
+        THEN ROUND(
+            3440.065 * ACOS(
+                LEAST(1, GREATEST(-1,
+                    SIN(p.latitude * 3.14159/180) * SIN(dest.latitude * 3.14159/180) +
+                    COS(p.latitude * 3.14159/180) * COS(dest.latitude * 3.14159/180) *
+                    COS((dest.longitude - p.longitude) * 3.14159/180)
+                ))
+            )
+        )
+        ELSE NULL
+    END as distance_to_dest_nm,
+
+    -- Estimate time remaining
+    CASE 
+        WHEN vfr.dest_airport_id IS NOT NULL
+         AND p.latitude IS NOT NULL 
+         AND p.longitude IS NOT NULL
+         AND p.ground_speed > 50
+        THEN ROUND(
+            (3440.065 * ACOS(
+                LEAST(1, GREATEST(-1,
+                    SIN(p.latitude * 3.14159/180) * SIN(dest.latitude * 3.14159/180) +
+                    COS(p.latitude * 3.14159/180) * COS(dest.latitude * 3.14159/180) *
+                    COS((dest.longitude - p.longitude) * 3.14159/180)
+                ))
+            )) / p.ground_speed * 60
+        , 0)
+        ELSE NULL
+    END as minutes_to_dest
+
+FROM v_flight_routes vfr
+LEFT JOIN airports dest ON vfr.dest_airport_id = dest.airport_id
+LEFT JOIN (
+    -- Get most recent position for each flight
+    SELECT 
+        p1.flight_id,
+        p1.latitude,
+        p1.longitude,
+        p1.altitude,
+        p1.ground_speed,
+        p1.track,
+        p1.received_time
+    FROM positions p1
+    WHERE p1.position_id IN (
+        SELECT MAX(position_id)
+        FROM positions p2
+        WHERE p2.flight_id = p1.flight_id
+          AND p2.latitude IS NOT NULL
+          AND p2.longitude IS NOT NULL
+    )
+) p ON vfr.flight_id = p.flight_id
+WHERE vfr.last_contact > SYSDATE - (30/1440)
+;
+--------------------------------------------------------
+--  DDL for View V_DAILY_FLIGHT_STATISTICS
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_DAILY_FLIGHT_STATISTICS" ("STAT_DATE", "TOTAL_FLIGHTS", "UNIQUE_AIRCRAFT", "AVG_DURATION_MIN", "HIGHEST_ALTITUDE", "AVG_MAX_ALTITUDE", "AVG_SPEED", "TOTAL_POSITIONS", "TOTAL_DISTANCE_NM", "FLIGHTS_WITH_ROUTES") AS 
+  SELECT 
+    TRUNC(archived_date) as stat_date,
+    COUNT(*) as total_flights,
+    COUNT(DISTINCT icao_address) as unique_aircraft,
+    ROUND(AVG(flight_duration_min), 1) as avg_duration_min,
+    MAX(max_altitude) as highest_altitude,
+    ROUND(AVG(max_altitude), 0) as avg_max_altitude,
+    ROUND(AVG(avg_speed), 0) as avg_speed,
+    SUM(total_positions) as total_positions,
+    ROUND(SUM(total_distance_nm), 0) as total_distance_nm,
+    COUNT(CASE WHEN origin_icao IS NOT NULL AND dest_icao IS NOT NULL THEN 1 END) as flights_with_routes
+FROM flight_history
+WHERE archived_date > SYSDATE - 90  -- Last 90 days
+GROUP BY TRUNC(archived_date)
+ORDER BY stat_date DESC
+;
+--------------------------------------------------------
+--  DDL for View V_EMERGENCY_AIRCRAFT
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_EMERGENCY_AIRCRAFT" ("ICAO_ADDRESS", "REGISTRATION", "AIRCRAFT_TYPE", "CALLSIGN", "SQUAWK", "SQUAWK_DESCRIPTION", "EMERGENCY_TYPE", "ALTITUDE", "LATITUDE", "LONGITUDE", "RECEIVED_TIME") AS 
+  SELECT 
+    p.icao_address,
+    a.registration,
+    a.aircraft_type,
+    f.callsign,
+    p.squawk,
+    s.description AS squawk_description,
+    s.category AS emergency_type,
+    p.altitude,
+    p.latitude,
+    p.longitude,
+    p.received_time
+FROM positions p
+JOIN aircraft a ON p.icao_address = a.icao_address
+JOIN flights f ON p.flight_id = f.flight_id
+JOIN squawk_codes s ON p.squawk = s.squawk_code
+WHERE p.squawk IN ('7500', '7600', '7700')
+  AND p.received_time > SYSDATE - 1  -- Last 24 hours
+ORDER BY p.received_time DESC
+;
+--------------------------------------------------------
+--  DDL for View V_FLIGHT_ROUTES
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_FLIGHT_ROUTES" ("FLIGHT_ID", "ICAO_ADDRESS", "CALLSIGN", "REGISTRATION", "AIRCRAFT_TYPE", "MANUFACTURER", "MODEL", "ORIGIN_AIRPORT_ID", "ORIGIN_ICAO", "ORIGIN_IATA", "ORIGIN_NAME", "ORIGIN_CITY", "ORIGIN_COUNTRY", "DEST_AIRPORT_ID", "DEST_ICAO", "DEST_IATA", "DEST_NAME", "DEST_CITY", "DEST_COUNTRY", "ACTUAL_DEPARTURE", "ESTIMATED_ARRIVAL", "ACTUAL_ARRIVAL", "ROUTE_DISTANCE_NM", "FIRST_CONTACT", "LAST_CONTACT", "TOTAL_POSITIONS", "MAX_ALTITUDE", "AVG_SPEED") AS 
+  SELECT 
+    f.flight_id,
+    f.icao_address,
+    f.callsign,
+    a.registration,
+    a.aircraft_type,
+    a.manufacturer,
+    a.model,
+    
+    -- Origin airport
+    origin.airport_id as origin_airport_id,
+    origin.icao_code as origin_icao,
+    origin.iata_code as origin_iata,
+    origin.airport_name as origin_name,
+    origin.city as origin_city,
+    origin.country as origin_country,
+    
+    -- Destination airport
+    dest.airport_id as dest_airport_id,
+    dest.icao_code as dest_icao,
+    dest.iata_code as dest_iata,
+    dest.airport_name as dest_name,
+    dest.city as dest_city,
+    dest.country as dest_country,
+    
+    -- Route details
+    fr.actual_departure,
+    fr.estimated_arrival,
+    fr.actual_arrival,
+    
+    -- Calculate route distance if both airports known
+    CASE 
+        WHEN origin.latitude IS NOT NULL 
+         AND origin.longitude IS NOT NULL
+         AND dest.latitude IS NOT NULL 
+         AND dest.longitude IS NOT NULL
+        THEN ROUND(
+            3440.065 * ACOS(
+                LEAST(1, GREATEST(-1,
+                    SIN(origin.latitude * 3.14159/180) * SIN(dest.latitude * 3.14159/180) +
+                    COS(origin.latitude * 3.14159/180) * COS(dest.latitude * 3.14159/180) *
+                    COS((dest.longitude - origin.longitude) * 3.14159/180)
+                ))
+            )
+        )
+        ELSE NULL
+    END as route_distance_nm,
+
+    -- Flight status
+    f.first_contact,
+    f.last_contact,
+
+    -- Current position info
+    (SELECT COUNT(*) FROM positions p WHERE p.flight_id = f.flight_id) as total_positions,
+    (SELECT MAX(altitude) FROM positions p WHERE p.flight_id = f.flight_id) as max_altitude,
+    (SELECT AVG(ground_speed) FROM positions p WHERE p.flight_id = f.flight_id AND ground_speed > 0) as avg_speed
+
+FROM flights f
+JOIN aircraft a ON f.icao_address = a.icao_address
+LEFT JOIN flight_routes fr ON f.flight_id = fr.flight_id
+LEFT JOIN airports origin ON fr.origin_airport_id = origin.airport_id
+LEFT JOIN airports dest ON fr.dest_airport_id = dest.airport_id
+WHERE f.last_contact > SYSDATE - 1
+;
+--------------------------------------------------------
+--  DDL for View V_FLIGHT_STATS
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_FLIGHT_STATS" ("FLIGHT_ID", "ICAO_ADDRESS", "CALLSIGN", "POSITION_COUNT", "FIRST_POSITION", "LAST_POSITION", "MAX_ALTITUDE", "AVG_SPEED") AS 
+  SELECT 
+    f.flight_id,
+    f.icao_address,
+    f.callsign,
+    COUNT(p.position_id) AS position_count,
+    MIN(p.received_time) AS first_position,
+    MAX(p.received_time) AS last_position,
+    MAX(p.altitude) AS max_altitude,
+    ROUND(AVG(p.ground_speed), 0) AS avg_speed
+FROM flights f
+LEFT JOIN positions p ON f.flight_id = p.flight_id
+GROUP BY f.flight_id, f.icao_address, f.callsign
+;
+--------------------------------------------------------
+--  DDL for View V_FLIGHT_STATS_ACTIVE
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_FLIGHT_STATS_ACTIVE" ("FLIGHT_ID", "ICAO_ADDRESS", "CALLSIGN", "FIRST_CONTACT", "LAST_CONTACT", "ENDED_TIME", "IS_ACTIVE", "POSITION_COUNT", "MAX_ALTITUDE", "AVG_SPEED", "MIN_LAT", "MAX_LAT", "MIN_LON", "MAX_LON") AS 
+  SELECT 
+    f.flight_id,
+    f.icao_address,
+    f.callsign,
+    f.first_contact,
+    f.last_contact,
+    f.ended_time,
+    f.is_active,
+    -- Use a subquery for aggregates to avoid GROUP BY on timestamps
+    (SELECT COUNT(*) FROM positions p WHERE p.flight_id = f.flight_id) as position_count,
+    (SELECT MAX(altitude) FROM positions p WHERE p.flight_id = f.flight_id) as max_altitude,
+    (SELECT ROUND(AVG(ground_speed), 0) FROM positions p WHERE p.flight_id = f.flight_id) as avg_speed,
+    (SELECT MIN(latitude) FROM positions p WHERE p.flight_id = f.flight_id) as min_lat,
+    (SELECT MAX(latitude) FROM positions p WHERE p.flight_id = f.flight_id) as max_lat,
+    (SELECT MIN(longitude) FROM positions p WHERE p.flight_id = f.flight_id) as min_lon,
+    (SELECT MAX(longitude) FROM positions p WHERE p.flight_id = f.flight_id) as max_lon
+FROM flights f
+ORDER BY f.last_contact DESC
+;
+--------------------------------------------------------
+--  DDL for View V_HOURLY_TRAFFIC
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_HOURLY_TRAFFIC" ("HOUR", "AIRCRAFT_COUNT", "MESSAGE_COUNT", "AVG_ALTITUDE") AS 
+  SELECT 
+    TRUNC(received_time, 'HH') AS hour,
+    COUNT(DISTINCT icao_address) AS aircraft_count,
+    COUNT(*) AS message_count,
+    AVG(altitude) AS avg_altitude
+FROM positions
+WHERE received_time > SYSDATE - 7  -- Last 7 days
+GROUP BY TRUNC(received_time, 'HH')
+ORDER BY hour DESC
+;
+--------------------------------------------------------
+--  DDL for View V_MIGRATION_PROGRESS
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_MIGRATION_PROGRESS" ("STEP_NUMBER", "STEP_NAME", "STATUS", "ROWS_PROCESSED", "EXECUTED_AT", "ERROR_MESSAGE") AS 
+  SELECT
+    step_number,
+    step_name,
+    status,
+    rows_processed,
+    TO_CHAR(migration_date, 'YYYY-MM-DD HH24:MI:SS') as executed_at,
+    error_message
+FROM migration_status
+ORDER BY migration_id DESC
+;
+--------------------------------------------------------
+--  DDL for View V_PARTITION_HEALTH
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_PARTITION_HEALTH" ("TABLE_NAME", "PARTITION_NAME", "PARTITION_POSITION", "HIGH_VALUE", "NUM_ROWS", "SIZE_MB", "LAST_ANALYZED", "HEALTH_STATUS") AS 
+  SELECT
+    p.table_name,
+    p.partition_name,
+    p.partition_position,
+    p.high_value,
+    p.num_rows,
+    ROUND(p.blocks * 8 / 1024, 2) as size_mb,
+    p.last_analyzed,
+    CASE
+        WHEN p.num_rows = 0 THEN 'EMPTY'
+        WHEN p.last_analyzed IS NULL THEN 'NO_STATS'
+        WHEN p.last_analyzed < SYSDATE - 7 THEN 'STALE_STATS'
+        ELSE 'HEALTHY'
+    END as health_status
+FROM user_tab_partitions p
+WHERE p.table_name = 'POSITIONS'
+ORDER BY p.partition_position
+;
+--------------------------------------------------------
+--  DDL for View V_POPULAR_ROUTES
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_POPULAR_ROUTES" ("DEPARTURE_AIRPORT", "ARRIVAL_AIRPORT", "FLIGHT_COUNT", "AVG_DISTANCE", "FIRST_FLIGHT", "LAST_FLIGHT") AS 
+  SELECT 
+    fr.departure_airport,
+    fr.arrival_airport,
+    COUNT(*) AS flight_count,
+    AVG(fr.route_distance) AS avg_distance,
+    MIN(fr.estimated_departure) AS first_flight,
+    MAX(fr.estimated_arrival) AS last_flight
+FROM flight_routes fr
+WHERE fr.departure_airport IS NOT NULL 
+  AND fr.arrival_airport IS NOT NULL
+GROUP BY fr.departure_airport, fr.arrival_airport
+HAVING COUNT(*) > 1
+ORDER BY flight_count DESC
+;
+--------------------------------------------------------
+--  DDL for View V_POPULAR_ROUTES_ARCHIVED
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_POPULAR_ROUTES_ARCHIVED" ("ROUTE", "ORIGIN_NAME", "ORIGIN_CITY", "DEST_NAME", "DEST_CITY", "FLIGHT_COUNT", "UNIQUE_AIRCRAFT", "AVG_DURATION_MIN", "AVG_MAX_ALTITUDE", "AVG_DISTANCE_NM", "FIRST_FLIGHT", "LAST_FLIGHT") AS 
+  SELECT 
+    fh.origin_icao || ' → ' || fh.dest_icao as route,
+    origin.airport_name as origin_name,
+    origin.city as origin_city,
+    dest.airport_name as dest_name,
+    dest.city as dest_city,
+    COUNT(*) as flight_count,
+    COUNT(DISTINCT fh.icao_address) as unique_aircraft,
+    ROUND(AVG(fh.flight_duration_min), 1) as avg_duration_min,
+    ROUND(AVG(fh.max_altitude), 0) as avg_max_altitude,
+    ROUND(AVG(fh.route_distance_nm), 0) as avg_distance_nm,
+    MIN(fh.first_contact) as first_flight,
+    MAX(fh.last_contact) as last_flight
+FROM flight_history fh
+JOIN airports origin ON fh.origin_airport_id = origin.airport_id
+JOIN airports dest ON fh.dest_airport_id = dest.airport_id
+WHERE fh.origin_icao IS NOT NULL 
+  AND fh.dest_icao IS NOT NULL
+  AND fh.archived_date > SYSDATE - 30  -- Last 30 days
+GROUP BY 
+    fh.origin_icao, fh.dest_icao,
+    origin.airport_name, origin.city,
+    dest.airport_name, dest.city
+HAVING COUNT(*) >= 2  -- At least 2 flights on this route
+ORDER BY flight_count DESC, last_flight DESC
+;
+--------------------------------------------------------
+--  DDL for View V_POPULAR_ROUTES_ENHANCED
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_POPULAR_ROUTES_ENHANCED" ("ROUTE_CODE", "ORIGIN_ICAO", "ORIGIN_IATA", "ORIGIN_NAME", "ORIGIN_CITY", "DEST_ICAO", "DEST_IATA", "DEST_NAME", "DEST_CITY", "FLIGHT_COUNT", "UNIQUE_AIRCRAFT", "AVG_DISTANCE_NM", "FIRST_SEEN", "LAST_SEEN") AS 
+  SELECT 
+    origin.icao_code || '-' || dest.icao_code as route_code,
+    origin.icao_code as origin_icao,
+    origin.iata_code as origin_iata,
+    origin.airport_name as origin_name,
+    origin.city as origin_city,
+    dest.icao_code as dest_icao,
+    dest.iata_code as dest_iata,
+    dest.airport_name as dest_name,
+    dest.city as dest_city,
+    COUNT(DISTINCT fr.flight_id) as flight_count,
+    COUNT(DISTINCT f.icao_address) as unique_aircraft,
+    ROUND(AVG(
+        CASE 
+            WHEN origin.latitude IS NOT NULL 
+             AND dest.latitude IS NOT NULL
+            THEN 3440.065 * ACOS(
+                LEAST(1, GREATEST(-1,
+                    SIN(origin.latitude * 3.14159/180) * SIN(dest.latitude * 3.14159/180) +
+                    COS(origin.latitude * 3.14159/180) * COS(dest.latitude * 3.14159/180) *
+                    COS((dest.longitude - origin.longitude) * 3.14159/180)
+                ))
+            )
+            ELSE NULL
+        END
+    )) as avg_distance_nm,
+    MIN(fr.actual_departure) as first_seen,
+    MAX(fr.actual_departure) as last_seen
+FROM flight_routes fr
+JOIN flights f ON fr.flight_id = f.flight_id
+JOIN airports origin ON fr.origin_airport_id = origin.airport_id
+JOIN airports dest ON fr.dest_airport_id = dest.airport_id
+WHERE fr.origin_airport_id IS NOT NULL
+  AND fr.dest_airport_id IS NOT NULL
+  AND fr.actual_departure > SYSDATE - 30  -- Last 30 days
+GROUP BY 
+    origin.icao_code,
+    origin.iata_code,
+    origin.airport_name,
+    origin.city,
+    dest.icao_code,
+    dest.iata_code,
+    dest.airport_name,
+    dest.city
+HAVING COUNT(DISTINCT fr.flight_id) >= 2
+ORDER BY flight_count DESC
+;
+--------------------------------------------------------
+--  DDL for View V_RECENT_ARCHIVED_FLIGHTS
+--------------------------------------------------------
+
+  CREATE OR REPLACE FORCE EDITIONABLE VIEW "ADSB_USER"."V_RECENT_ARCHIVED_FLIGHTS" ("HISTORY_ID", "ICAO_ADDRESS", "CALLSIGN", "REGISTRATION", "AIRCRAFT_TYPE", "OPERATOR", "FIRST_CONTACT", "LAST_CONTACT", "FLIGHT_DURATION_MIN", "TOTAL_POSITIONS", "MAX_ALTITUDE", "AVG_ALTITUDE", "MAX_SPEED", "AVG_SPEED", "MAX_DISTANCE_NM", "TOTAL_DISTANCE_NM", "ROUTE", "ORIGIN_NAME", "ORIGIN_CITY", "DEST_NAME", "DEST_CITY", "ROUTE_DISTANCE_NM", "ARCHIVED_DATE", "ARCHIVE_REASON") AS 
+  SELECT 
+    fh.history_id,
+    fh.icao_address,
+    fh.callsign,
+    fh.registration,
+    fh.aircraft_type,
+    fh.operator,
+    fh.first_contact,
+    fh.last_contact,
+    fh.flight_duration_min,
+    fh.total_positions,
+    fh.max_altitude,
+    fh.avg_altitude,
+    fh.max_speed,
+    fh.avg_speed,
+    fh.max_distance_nm,
+    fh.total_distance_nm,
+    fh.origin_icao || CASE WHEN fh.origin_icao IS NOT NULL AND fh.dest_icao IS NOT NULL THEN ' → ' ELSE '' END || fh.dest_icao as route,
+    origin.airport_name as origin_name,
+    origin.city as origin_city,
+    dest.airport_name as dest_name,
+    dest.city as dest_city,
+    fh.route_distance_nm,
+    fh.archived_date,
+    fh.archive_reason
+FROM flight_history fh
+LEFT JOIN airports origin ON fh.origin_airport_id = origin.airport_id
+LEFT JOIN airports dest ON fh.dest_airport_id = dest.airport_id
+WHERE fh.archived_date > SYSDATE - 7  -- Last 7 days
+ORDER BY fh.archived_date DESC
+;
+--------------------------------------------------------
+--  DDL for Index SYS_C008529
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008529" ON "ADSB_USER"."AIRCRAFT" ("ICAO_ADDRESS") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008541
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008541" ON "ADSB_USER"."AIRLINES" ("AIRLINE_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008542
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008542" ON "ADSB_USER"."AIRLINES" ("CALLSIGN_PREFIX") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008560
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008560" ON "ADSB_USER"."AIRPORTS" ("AIRPORT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008561
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008561" ON "ADSB_USER"."AIRPORTS" ("ICAO_CODE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008555
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008555" ON "ADSB_USER"."ALERT_HISTORY" ("HISTORY_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008550
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008550" ON "ADSB_USER"."ALERTS" ("ALERT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008565
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008565" ON "ADSB_USER"."COVERAGE_STATS" ("STAT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index UQ_COVERAGE_DATE_HOUR
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."UQ_COVERAGE_DATE_HOUR" ON "ADSB_USER"."COVERAGE_STATS" ("STAT_DATE", "STAT_HOUR") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008567
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008567" ON "ADSB_USER"."DAILY_STATS" ("STAT_DATE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008573
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008573" ON "ADSB_USER"."FLIGHT_ROUTES" ("ROUTE_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008532
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008532" ON "ADSB_USER"."FLIGHTS" ("FLIGHT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index PK_MIGRATION_STATUS
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."PK_MIGRATION_STATUS" ON "ADSB_USER"."MIGRATION_STATUS" ("MIGRATION_ID") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index PK_PARTITION_OPS
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."PK_PARTITION_OPS" ON "ADSB_USER"."PARTITION_OPERATIONS" ("OPERATION_ID") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index SYS_C008568
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."SYS_C008568" ON "ADSB_USER"."SQUAWK_CODES" ("SQUAWK_CODE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index PK_FLIGHT_NOTIFICATIONS
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."PK_FLIGHT_NOTIFICATIONS" ON "ADSB_USER"."FLIGHT_NOTIFICATIONS" ("NOTIFICATION_ID") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index PK_FLIGHT_HISTORY
+--------------------------------------------------------
+
+  CREATE UNIQUE INDEX "ADSB_USER"."PK_FLIGHT_HISTORY" ON "ADSB_USER"."FLIGHT_HISTORY" ("HISTORY_ID") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHTS_ACTIVE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHTS_ACTIVE" ON "ADSB_USER"."FLIGHTS" ("IS_ACTIVE", "LAST_CONTACT") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_ALERT_HISTORY_TIME
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_ALERT_HISTORY_TIME" ON "ADSB_USER"."ALERT_HISTORY" ("TRIGGERED_TIME") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_ALERTS_ACTIVE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_ALERTS_ACTIVE" ON "ADSB_USER"."ALERTS" ("IS_ACTIVE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_POSITIONS_SPEED_TRACK
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_POSITIONS_SPEED_TRACK" ON "ADSB_USER"."POSITIONS" ("FLIGHT_ID", "RECEIVED_TIME", "GROUND_SPEED", "TRACK") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  LOCAL
+ (PARTITION "P_INITIAL" NOCOMPRESS 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 LOGGING 
+  STORAGE( INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ) ;
+--------------------------------------------------------
+--  DDL for Index IDX_NOTIF_TYPE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_NOTIF_TYPE" ON "ADSB_USER"."FLIGHT_NOTIFICATIONS" ("NOTIFICATION_TYPE") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHTS_ICAO_CONTACT
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHTS_ICAO_CONTACT" ON "ADSB_USER"."FLIGHTS" ("ICAO_ADDRESS", "LAST_CONTACT") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_PARTOPS_TYPE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_PARTOPS_TYPE" ON "ADSB_USER"."PARTITION_OPERATIONS" ("OPERATION_TYPE") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_HIST_ICAO
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_HIST_ICAO" ON "ADSB_USER"."FLIGHT_HISTORY" ("ICAO_ADDRESS") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_HIST_ORIGIN
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_HIST_ORIGIN" ON "ADSB_USER"."FLIGHT_HISTORY" ("ORIGIN_AIRPORT_ID") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_ROUTES_DEPARTURE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_ROUTES_DEPARTURE" ON "ADSB_USER"."FLIGHT_ROUTES" ("ACTUAL_DEPARTURE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_AIRPORTS_IATA
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_AIRPORTS_IATA" ON "ADSB_USER"."AIRPORTS" ("IATA_CODE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHTS_ICAO
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHTS_ICAO" ON "ADSB_USER"."FLIGHTS" ("ICAO_ADDRESS") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_HIST_CALLSIGN
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_HIST_CALLSIGN" ON "ADSB_USER"."FLIGHT_HISTORY" ("CALLSIGN") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_POSITIONS_TIME
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_POSITIONS_TIME" ON "ADSB_USER"."POSITIONS" ("RECEIVED_TIME") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  LOCAL
+ (PARTITION "P_INITIAL" NOCOMPRESS 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 LOGGING 
+  STORAGE( INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ) ;
+--------------------------------------------------------
+--  DDL for Index IDX_ALERT_HISTORY_ALERT
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_ALERT_HISTORY_ALERT" ON "ADSB_USER"."ALERT_HISTORY" ("ALERT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_POSITIONS_FLIGHT_TIME
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_POSITIONS_FLIGHT_TIME" ON "ADSB_USER"."POSITIONS" ("FLIGHT_ID", "RECEIVED_TIME", "LATITUDE", "LONGITUDE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  LOCAL
+ (PARTITION "P_INITIAL" NOCOMPRESS 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 LOGGING 
+  STORAGE( INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ) ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_ROUTES_DEST
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_ROUTES_DEST" ON "ADSB_USER"."FLIGHT_ROUTES" ("DEST_AIRPORT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_PARTOPS_DATE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_PARTOPS_DATE" ON "ADSB_USER"."PARTITION_OPERATIONS" ("OPERATION_DATE") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_AIRCRAFT_LASTSEEN
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_AIRCRAFT_LASTSEEN" ON "ADSB_USER"."AIRCRAFT" ("LAST_SEEN") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_POSITIONS_LATLONG
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_POSITIONS_LATLONG" ON "ADSB_USER"."POSITIONS" ("LATITUDE", "LONGITUDE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  LOCAL
+ (PARTITION "P_INITIAL" NOCOMPRESS 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 LOGGING 
+  STORAGE( INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ) ;
+--------------------------------------------------------
+--  DDL for Index IDX_NOTIF_DATE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_NOTIF_DATE" ON "ADSB_USER"."FLIGHT_NOTIFICATIONS" ("CREATED_DATE") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_NOTIF_STATUS
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_NOTIF_STATUS" ON "ADSB_USER"."FLIGHT_NOTIFICATIONS" ("SENT_STATUS") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_AIRPORTS_COORDS
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_AIRPORTS_COORDS" ON "ADSB_USER"."AIRPORTS" ("LATITUDE", "LONGITUDE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHTS_CALLSIGN
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHTS_CALLSIGN" ON "ADSB_USER"."FLIGHTS" ("CALLSIGN") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_ALERTS_TYPE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_ALERTS_TYPE" ON "ADSB_USER"."ALERTS" ("ALERT_TYPE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_ROUTES_ORIGIN
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_ROUTES_ORIGIN" ON "ADSB_USER"."FLIGHT_ROUTES" ("ORIGIN_AIRPORT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_COVERAGE_DATE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_COVERAGE_DATE" ON "ADSB_USER"."COVERAGE_STATS" ("STAT_DATE") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_ROUTES_FLIGHT
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_ROUTES_FLIGHT" ON "ADSB_USER"."FLIGHT_ROUTES" ("FLIGHT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_HIST_DATE
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_HIST_DATE" ON "ADSB_USER"."FLIGHT_HISTORY" ("ARCHIVED_DATE") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_POSITIONS_ICAO
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_POSITIONS_ICAO" ON "ADSB_USER"."POSITIONS" ("ICAO_ADDRESS") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  LOCAL
+ (PARTITION "P_INITIAL" NOCOMPRESS 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 LOGGING 
+  STORAGE( INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ) ;
+--------------------------------------------------------
+--  DDL for Index IDX_FLIGHT_HIST_DEST
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_FLIGHT_HIST_DEST" ON "ADSB_USER"."FLIGHT_HISTORY" ("DEST_AIRPORT_ID") 
+  PCTFREE 10 INITRANS 2 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS" ;
+--------------------------------------------------------
+--  DDL for Index IDX_POSITIONS_FLIGHT
+--------------------------------------------------------
+
+  CREATE INDEX "ADSB_USER"."IDX_POSITIONS_FLIGHT" ON "ADSB_USER"."POSITIONS" ("FLIGHT_ID") 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  LOCAL
+ (PARTITION "P_INITIAL" NOCOMPRESS 
+  PCTFREE 10 INITRANS 8 MAXTRANS 255 LOGGING 
+  STORAGE( INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS" ) ;
+--------------------------------------------------------
+--  DDL for Trigger TRG_FLIGHT_ROUTES_UPDATE
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE TRIGGER "ADSB_USER"."TRG_FLIGHT_ROUTES_UPDATE" 
+BEFORE UPDATE ON flight_routes
+FOR EACH ROW
+BEGIN
+    :NEW.last_updated := CURRENT_TIMESTAMP;
+END;
+
+
+/
+ALTER TRIGGER "ADSB_USER"."TRG_FLIGHT_ROUTES_UPDATE" ENABLE;
+--------------------------------------------------------
+--  DDL for Procedure ARCHIVE_FLIGHT
+--------------------------------------------------------
+set define off;
+
+  CREATE OR REPLACE EDITIONABLE PROCEDURE "ADSB_USER"."ARCHIVE_FLIGHT" (
+    p_flight_id IN NUMBER,
+    p_reason IN VARCHAR2 DEFAULT 'STALE'
+) IS
+    v_flight_rec flight_history%ROWTYPE;
+    v_first_pos_time TIMESTAMP;
+    v_last_pos_time TIMESTAMP;
+    v_notification_text VARCHAR2(500);
+    v_origin_name VARCHAR2(200);
+    v_dest_name VARCHAR2(200);
+BEGIN
+    -- Get basic flight information
+    SELECT 
+        f.flight_id,
+        f.icao_address,
+        f.callsign,
+        f.first_contact,
+        f.last_contact,
+        a.registration,
+        a.aircraft_type,
+        a.manufacturer,
+        a.operator
+    INTO
+        v_flight_rec.flight_id,
+        v_flight_rec.icao_address,
+        v_flight_rec.callsign,
+        v_flight_rec.first_contact,
+        v_flight_rec.last_contact,
+        v_flight_rec.registration,
+        v_flight_rec.aircraft_type,
+        v_flight_rec.manufacturer,
+        v_flight_rec.operator
+    FROM flights f
+    JOIN aircraft a ON f.icao_address = a.icao_address
+    WHERE f.flight_id = p_flight_id;
+
+    -- Calculate flight duration
+    v_flight_rec.flight_duration_min := ROUND(
+        EXTRACT(HOUR FROM (v_flight_rec.last_contact - v_flight_rec.first_contact)) * 60 +
+        EXTRACT(MINUTE FROM (v_flight_rec.last_contact - v_flight_rec.first_contact)) +
+        EXTRACT(SECOND FROM (v_flight_rec.last_contact - v_flight_rec.first_contact)) / 60,
+        2
+    );
+
+    -- Get position statistics
+    SELECT 
+        COUNT(*) as total_positions,
+        COUNT(CASE WHEN latitude IS NOT NULL AND longitude IS NOT NULL THEN 1 END) as positions_with_coords,
+        MAX(altitude) as max_altitude,
+        MIN(CASE WHEN altitude > 0 THEN altitude END) as min_altitude,
+        ROUND(AVG(NULLIF(altitude, 0))) as avg_altitude,
+        MAX(ground_speed) as max_speed,
+        ROUND(AVG(NULLIF(ground_speed, 0))) as avg_speed
+    INTO
+        v_flight_rec.total_positions,
+        v_flight_rec.positions_with_coords,
+        v_flight_rec.max_altitude,
+        v_flight_rec.min_altitude,
+        v_flight_rec.avg_altitude,
+        v_flight_rec.max_speed,
+        v_flight_rec.avg_speed
+    FROM positions
+    WHERE flight_id = p_flight_id;
+
+    -- Calculate max distance from receiver
+    SELECT MAX(calculate_distance_from_receiver(latitude, longitude))
+    INTO v_flight_rec.max_distance_nm
+    FROM positions
+    WHERE flight_id = p_flight_id
+      AND latitude IS NOT NULL
+      AND longitude IS NOT NULL;
+
+    -- Calculate total distance traveled (sum of distances between consecutive points)
+    WITH ordered_positions AS (
+        SELECT 
+            latitude,
+            longitude,
+            LAG(latitude) OVER (ORDER BY received_time) as prev_lat,
+            LAG(longitude) OVER (ORDER BY received_time) as prev_lon
+        FROM positions
+        WHERE flight_id = p_flight_id
+          AND latitude IS NOT NULL
+          AND longitude IS NOT NULL
+    )
+    SELECT ROUND(SUM(
+        CASE 
+            WHEN prev_lat IS NOT NULL AND prev_lon IS NOT NULL THEN
+                -- Simple distance calculation between consecutive points
+                3440.065 * 2 * ASIN(SQRT(
+                    POWER(SIN((latitude - prev_lat) * 3.14159265359 / 360), 2) +
+                    COS(prev_lat * 3.14159265359 / 180) * 
+                    COS(latitude * 3.14159265359 / 180) * 
+                    POWER(SIN((longitude - prev_lon) * 3.14159265359 / 360), 2)
+                ))
+            ELSE 0
+        END
+    ), 2)
+    INTO v_flight_rec.total_distance_nm
+    FROM ordered_positions;
+
+    -- Get route information if available
+    BEGIN
+        SELECT 
+            fr.origin_airport_id,
+            fr.dest_airport_id,
+            fr.route_distance_nm,
+            origin.icao_code,
+            dest.icao_code,
+            origin.airport_name,
+            dest.airport_name
+        INTO
+            v_flight_rec.origin_airport_id,
+            v_flight_rec.dest_airport_id,
+            v_flight_rec.route_distance_nm,
+            v_flight_rec.origin_icao,
+            v_flight_rec.dest_icao,
+            v_origin_name,
+            v_dest_name
+        FROM flight_routes fr
+        LEFT JOIN airports origin ON fr.origin_airport_id = origin.airport_id
+        LEFT JOIN airports dest ON fr.dest_airport_id = dest.airport_id
+        WHERE fr.flight_id = p_flight_id;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            v_flight_rec.origin_airport_id := NULL;
+            v_flight_rec.dest_airport_id := NULL;
+            v_flight_rec.origin_icao := NULL;
+            v_flight_rec.dest_icao := NULL;
+            v_origin_name := NULL;
+            v_dest_name := NULL;
+    END;
+
+    -- Set archive reason
+    v_flight_rec.archive_reason := p_reason;
+    v_flight_rec.archived_date := CURRENT_TIMESTAMP;
+
+    -- Insert into flight history
+    INSERT INTO flight_history (
+        flight_id, icao_address, callsign,
+        first_contact, last_contact, flight_duration_min,
+        registration, aircraft_type, manufacturer, operator,
+        total_positions, positions_with_coords,
+        max_altitude, min_altitude, avg_altitude,
+        max_speed, avg_speed,
+        max_distance_nm, total_distance_nm,
+        origin_airport_id, dest_airport_id,
+        origin_icao, dest_icao, route_distance_nm,
+        archived_date, archive_reason
+    ) VALUES (
+        v_flight_rec.flight_id, v_flight_rec.icao_address, v_flight_rec.callsign,
+        v_flight_rec.first_contact, v_flight_rec.last_contact, v_flight_rec.flight_duration_min,
+        v_flight_rec.registration, v_flight_rec.aircraft_type, v_flight_rec.manufacturer, v_flight_rec.operator,
+        v_flight_rec.total_positions, v_flight_rec.positions_with_coords,
+        v_flight_rec.max_altitude, v_flight_rec.min_altitude, v_flight_rec.avg_altitude,
+        v_flight_rec.max_speed, v_flight_rec.avg_speed,
+        v_flight_rec.max_distance_nm, v_flight_rec.total_distance_nm,
+        v_flight_rec.origin_airport_id, v_flight_rec.dest_airport_id,
+        v_flight_rec.origin_icao, v_flight_rec.dest_icao, v_flight_rec.route_distance_nm,
+        v_flight_rec.archived_date, v_flight_rec.archive_reason
+    );
+
+    -- Create notification if it's an interesting flight
+    IF v_flight_rec.origin_icao IS NOT NULL OR 
+       v_flight_rec.dest_icao IS NOT NULL OR
+       v_flight_rec.max_altitude > 40000 OR
+       v_flight_rec.flight_duration_min > 60 THEN
+
+        -- Build notification text
+        v_notification_text := 'Flight ' || NVL(v_flight_rec.callsign, v_flight_rec.icao_address) || ' ended. ';
+
+        IF v_flight_rec.origin_icao IS NOT NULL AND v_flight_rec.dest_icao IS NOT NULL THEN
+            v_notification_text := v_notification_text || 
+                'Route: ' || v_flight_rec.origin_icao || ' → ' || v_flight_rec.dest_icao || '. ';
+        END IF;
+
+        v_notification_text := v_notification_text || 
+            'Duration: ' || ROUND(v_flight_rec.flight_duration_min) || ' min, ' ||
+            'Max Alt: ' || TO_CHAR(v_flight_rec.max_altitude, '999,999') || ' ft, ' ||
+            'Distance: ' || ROUND(NVL(v_flight_rec.total_distance_nm, 0)) || ' nm';
+
+        INSERT INTO flight_notifications (
+            flight_id, icao_address, callsign,
+            notification_type, notification_text,
+            duration_minutes, max_altitude,
+            origin_airport, dest_airport
+        ) VALUES (
+            v_flight_rec.flight_id,
+            v_flight_rec.icao_address,
+            v_flight_rec.callsign,
+            'FLIGHT_ENDED',
+            v_notification_text,
+            v_flight_rec.flight_duration_min,
+            v_flight_rec.max_altitude,
+            v_origin_name,
+            v_dest_name
+        );
+    END IF;
+
+    COMMIT;
+
+    -- Output summary
+    DBMS_OUTPUT.PUT_LINE('Flight archived: ' || NVL(v_flight_rec.callsign, v_flight_rec.icao_address));
+    DBMS_OUTPUT.PUT_LINE('  Duration: ' || ROUND(v_flight_rec.flight_duration_min) || ' minutes');
+    DBMS_OUTPUT.PUT_LINE('  Positions: ' || v_flight_rec.total_positions);
+    DBMS_OUTPUT.PUT_LINE('  Max altitude: ' || v_flight_rec.max_altitude || ' ft');
+    DBMS_OUTPUT.PUT_LINE('  Max distance: ' || v_flight_rec.max_distance_nm || ' nm');
+    IF v_flight_rec.origin_icao IS NOT NULL OR v_flight_rec.dest_icao IS NOT NULL THEN
+        DBMS_OUTPUT.PUT_LINE('  Route: ' || 
+            NVL(v_flight_rec.origin_icao, '????') || ' → ' || 
+            NVL(v_flight_rec.dest_icao, '????'));
+    END IF;
+
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('Error: Flight ' || p_flight_id || ' not found');
+        ROLLBACK;
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('Error archiving flight ' || p_flight_id || ': ' || SQLERRM);
+        ROLLBACK;
+        RAISE;
+END archive_flight;
+
+/
+
+  GRANT EXECUTE ON "ADSB_USER"."ARCHIVE_FLIGHT" TO PUBLIC;
+--------------------------------------------------------
+--  DDL for Procedure CLEANUP_FLIGHT_TRACKING
+--------------------------------------------------------
+set define off;
+
+  CREATE OR REPLACE EDITIONABLE PROCEDURE "ADSB_USER"."CLEANUP_FLIGHT_TRACKING" IS
+    v_cutoff_time TIMESTAMP;
+    v_flights_closed NUMBER := 0;
+    v_positions_deleted NUMBER := 0;
+BEGIN
+    -- Define cutoff time (flights with no activity in last hour)
+    v_cutoff_time := SYSTIMESTAMP - INTERVAL '1' HOUR;
+
+    -- Close stale flights (update last_contact to mark as inactive)
+    -- Note: We don't delete flights, just mark them as stale
+    UPDATE flights
+    SET last_contact = last_contact  -- This is a no-op, but you could add a status field
+    WHERE last_contact < v_cutoff_time
+      AND flight_id IN (
+          SELECT DISTINCT flight_id 
+          FROM positions 
+          WHERE received_time < v_cutoff_time
+      );
+
+    v_flights_closed := SQL%ROWCOUNT;
+
+    -- Optionally clean up very old position data (older than 30 days)
+    -- Uncomment if you want automatic cleanup
+    /*
+    DELETE FROM positions 
+    WHERE received_time < SYSTIMESTAMP - INTERVAL '30' DAY;
+
+    v_positions_deleted := SQL%ROWCOUNT;
+    */
+
+    COMMIT;
+
+    DBMS_OUTPUT.PUT_LINE('Flight tracking cleanup complete:');
+    DBMS_OUTPUT.PUT_LINE('  Flights processed: ' || v_flights_closed);
+    DBMS_OUTPUT.PUT_LINE('  Old positions deleted: ' || v_positions_deleted);
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error in cleanup_flight_tracking: ' || SQLERRM);
+        RAISE;
+END cleanup_flight_tracking;
+
+/
+--------------------------------------------------------
+--  DDL for Procedure END_STALE_FLIGHTS
+--------------------------------------------------------
+set define off;
+
+  CREATE OR REPLACE EDITIONABLE PROCEDURE "ADSB_USER"."END_STALE_FLIGHTS" (
+    p_inactivity_minutes IN NUMBER DEFAULT 30
+) IS
+    v_cutoff_time TIMESTAMP;
+    v_flights_ended NUMBER := 0;
+    v_flights_archived NUMBER := 0;
+
+    TYPE flight_id_table IS TABLE OF NUMBER;
+    v_stale_flights flight_id_table;
+BEGIN
+    -- Calculate cutoff time
+    v_cutoff_time := SYSTIMESTAMP - NUMTODSINTERVAL(p_inactivity_minutes, 'MINUTE');
+
+    -- Find all stale flights (no position updates in the specified time)
+    SELECT DISTINCT p.flight_id
+    BULK COLLECT INTO v_stale_flights
+    FROM positions p
+    WHERE p.flight_id IN (
+        SELECT f.flight_id
+        FROM flights f
+        WHERE f.last_contact >= v_cutoff_time  -- Flight was active recently but now stale
+    )
+    GROUP BY p.flight_id
+    HAVING MAX(p.received_time) < v_cutoff_time;
+
+    v_flights_ended := v_stale_flights.COUNT;
+
+    -- Archive each stale flight
+    IF v_stale_flights.COUNT > 0 THEN
+        FOR i IN 1..v_stale_flights.COUNT LOOP
+            BEGIN
+                -- Archive the flight with statistics
+                archive_flight(v_stale_flights(i), 'STALE');
+                v_flights_archived := v_flights_archived + 1;
+
+                -- Update the flight's last_contact to mark as ended
+                UPDATE flights
+                SET last_contact = (
+                    SELECT MAX(received_time)
+                    FROM positions
+                    WHERE flight_id = v_stale_flights(i)
+                )
+                WHERE flight_id = v_stale_flights(i);
+
+            EXCEPTION
+                WHEN OTHERS THEN
+                    DBMS_OUTPUT.PUT_LINE('Error archiving flight ' || 
+                        v_stale_flights(i) || ': ' || SQLERRM);
+                    -- Continue with next flight
+            END;
+        END LOOP;
+    END IF;
+
+    COMMIT;
+
+    -- Output summary
+    DBMS_OUTPUT.PUT_LINE('===========================================');
+    DBMS_OUTPUT.PUT_LINE('Stale Flights Cleanup Summary');
+    DBMS_OUTPUT.PUT_LINE('===========================================');
+    DBMS_OUTPUT.PUT_LINE('Inactivity threshold: ' || p_inactivity_minutes || ' minutes');
+    DBMS_OUTPUT.PUT_LINE('Flights identified: ' || v_flights_ended);
+    DBMS_OUTPUT.PUT_LINE('Flights archived: ' || v_flights_archived);
+    DBMS_OUTPUT.PUT_LINE('===========================================');
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error in end_stale_flights: ' || SQLERRM);
+        RAISE;
+END end_stale_flights;
+
+/
+
+  GRANT EXECUTE ON "ADSB_USER"."END_STALE_FLIGHTS" TO PUBLIC;
+--------------------------------------------------------
+--  DDL for Procedure PROCESS_FLIGHT_NOTIFICATIONS
+--------------------------------------------------------
+set define off;
+
+  CREATE OR REPLACE EDITIONABLE PROCEDURE "ADSB_USER"."PROCESS_FLIGHT_NOTIFICATIONS" IS
+    v_count NUMBER := 0;
+
+    CURSOR notification_cursor IS
+        SELECT notification_id, notification_text, icao_address, callsign
+        FROM flight_notifications
+        WHERE sent_status = 'PENDING'
+        ORDER BY created_date
+        FETCH FIRST 50 ROWS ONLY;
+BEGIN
+    -- Process pending notifications
+    FOR notif IN notification_cursor LOOP
+        BEGIN
+            -- In a real implementation, you would:
+            -- 1. Send email via UTL_MAIL or external API
+            -- 2. Send SMS via Twilio API
+            -- 3. Post to Discord/Slack webhook
+            -- 4. Write to external log file
+
+            -- For now, just mark as sent and output
+            DBMS_OUTPUT.PUT_LINE('📢 ' || notif.notification_text);
+
+            UPDATE flight_notifications
+            SET sent_status = 'SENT',
+                sent_date = CURRENT_TIMESTAMP
+            WHERE notification_id = notif.notification_id;
+
+            v_count := v_count + 1;
+
+        EXCEPTION
+            WHEN OTHERS THEN
+                -- Mark as failed
+                UPDATE flight_notifications
+                SET sent_status = 'FAILED'
+                WHERE notification_id = notif.notification_id;
+
+                DBMS_OUTPUT.PUT_LINE('Failed to send notification ' || 
+                    notif.notification_id || ': ' || SQLERRM);
+        END;
+    END LOOP;
+
+    COMMIT;
+
+    IF v_count > 0 THEN
+        DBMS_OUTPUT.PUT_LINE('Processed ' || v_count || ' flight notifications');
+    END IF;
+
+EXCEPTION
+    WHEN OTHERS THEN
+        ROLLBACK;
+        DBMS_OUTPUT.PUT_LINE('Error processing notifications: ' || SQLERRM);
+        RAISE;
+END process_flight_notifications;
+
+/
+
+  GRANT EXECUTE ON "ADSB_USER"."PROCESS_FLIGHT_NOTIFICATIONS" TO PUBLIC;
+--------------------------------------------------------
+--  DDL for Function CALCULATE_DISTANCE_FROM_RECEIVER
+--------------------------------------------------------
+
+  CREATE OR REPLACE EDITIONABLE FUNCTION "ADSB_USER"."CALCULATE_DISTANCE_FROM_RECEIVER" (
+    p_lat IN NUMBER,
+    p_lon IN NUMBER
+) RETURN NUMBER IS
+    -- Your receiver location (Arlington, TX)
+    v_receiver_lat CONSTANT NUMBER := 32.7357;
+    v_receiver_lon CONSTANT NUMBER := -97.1081;
+
+    v_earth_radius CONSTANT NUMBER := 3440.065;  -- Nautical miles
+    v_lat1_rad NUMBER;
+    v_lat2_rad NUMBER;
+    v_dlat NUMBER;
+    v_dlon NUMBER;
+    v_a NUMBER;
+    v_c NUMBER;
+    v_distance NUMBER;
+BEGIN
+    IF p_lat IS NULL OR p_lon IS NULL THEN
+        RETURN NULL;
+    END IF;
+
+    -- Convert to radians
+    v_lat1_rad := v_receiver_lat * 3.14159265359 / 180;
+    v_lat2_rad := p_lat * 3.14159265359 / 180;
+    v_dlat := (p_lat - v_receiver_lat) * 3.14159265359 / 180;
+    v_dlon := (p_lon - v_receiver_lon) * 3.14159265359 / 180;
+
+    -- Haversine formula
+    v_a := POWER(SIN(v_dlat/2), 2) + 
+           COS(v_lat1_rad) * COS(v_lat2_rad) * POWER(SIN(v_dlon/2), 2);
+    v_c := 2 * ASIN(SQRT(v_a));
+    v_distance := v_earth_radius * v_c;
+
+    RETURN ROUND(v_distance, 2);
+END calculate_distance_from_receiver;
+
+/
+
+  GRANT EXECUTE ON "ADSB_USER"."CALCULATE_DISTANCE_FROM_RECEIVER" TO PUBLIC;
+--------------------------------------------------------
+--  Constraints for Table DAILY_STATS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."DAILY_STATS" ADD PRIMARY KEY ("STAT_DATE")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table FLIGHT_NOTIFICATIONS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."FLIGHT_NOTIFICATIONS" MODIFY ("NOTIFICATION_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_NOTIFICATIONS" MODIFY ("FLIGHT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_NOTIFICATIONS" MODIFY ("ICAO_ADDRESS" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_NOTIFICATIONS" MODIFY ("NOTIFICATION_TYPE" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_NOTIFICATIONS" ADD CONSTRAINT "PK_FLIGHT_NOTIFICATIONS" PRIMARY KEY ("NOTIFICATION_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table ALERT_HISTORY
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."ALERT_HISTORY" MODIFY ("HISTORY_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."ALERT_HISTORY" MODIFY ("ALERT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."ALERT_HISTORY" MODIFY ("FLIGHT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."ALERT_HISTORY" MODIFY ("ICAO_ADDRESS" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."ALERT_HISTORY" ADD PRIMARY KEY ("HISTORY_ID")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table AIRCRAFT
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."AIRCRAFT" ADD PRIMARY KEY ("ICAO_ADDRESS")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table AIRPORTS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."AIRPORTS" MODIFY ("AIRPORT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."AIRPORTS" MODIFY ("ICAO_CODE" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."AIRPORTS" ADD PRIMARY KEY ("AIRPORT_ID")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+  ALTER TABLE "ADSB_USER"."AIRPORTS" ADD UNIQUE ("ICAO_CODE")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table SQUAWK_CODES
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."SQUAWK_CODES" ADD PRIMARY KEY ("SQUAWK_CODE")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table PARTITION_OPERATIONS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."PARTITION_OPERATIONS" MODIFY ("OPERATION_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."PARTITION_OPERATIONS" ADD CONSTRAINT "PK_PARTITION_OPS" PRIMARY KEY ("OPERATION_ID")
+  USING INDEX "ADSB_USER"."PK_PARTITION_OPS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table POSITIONS_BACKUP
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."POSITIONS_BACKUP" MODIFY ("POSITION_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."POSITIONS_BACKUP" MODIFY ("FLIGHT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."POSITIONS_BACKUP" MODIFY ("ICAO_ADDRESS" NOT NULL ENABLE);
+--------------------------------------------------------
+--  Constraints for Table POSITIONS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."POSITIONS" MODIFY ("POSITION_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."POSITIONS" MODIFY ("FLIGHT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."POSITIONS" MODIFY ("ICAO_ADDRESS" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."POSITIONS" ADD PRIMARY KEY ("POSITION_ID")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table AIRLINES
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."AIRLINES" MODIFY ("AIRLINE_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."AIRLINES" MODIFY ("CALLSIGN_PREFIX" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."AIRLINES" ADD PRIMARY KEY ("AIRLINE_ID")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+  ALTER TABLE "ADSB_USER"."AIRLINES" ADD UNIQUE ("CALLSIGN_PREFIX")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table COVERAGE_STATS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."COVERAGE_STATS" MODIFY ("STAT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."COVERAGE_STATS" MODIFY ("STAT_DATE" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."COVERAGE_STATS" MODIFY ("STAT_HOUR" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."COVERAGE_STATS" ADD PRIMARY KEY ("STAT_ID")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS"  ENABLE;
+  ALTER TABLE "ADSB_USER"."COVERAGE_STATS" ADD CONSTRAINT "UQ_COVERAGE_DATE_HOUR" UNIQUE ("STAT_DATE", "STAT_HOUR")
+  USING INDEX "ADSB_USER"."UQ_COVERAGE_DATE_HOUR"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table MIGRATION_STATUS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."MIGRATION_STATUS" MODIFY ("MIGRATION_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."MIGRATION_STATUS" ADD CONSTRAINT "PK_MIGRATION_STATUS" PRIMARY KEY ("MIGRATION_ID")
+  USING INDEX "ADSB_USER"."PK_MIGRATION_STATUS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table FLIGHT_ROUTES
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."FLIGHT_ROUTES" MODIFY ("ROUTE_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_ROUTES" MODIFY ("FLIGHT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_ROUTES" ADD PRIMARY KEY ("ROUTE_ID")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table FLIGHT_HISTORY
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."FLIGHT_HISTORY" MODIFY ("HISTORY_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_HISTORY" MODIFY ("FLIGHT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_HISTORY" MODIFY ("ICAO_ADDRESS" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHT_HISTORY" ADD CONSTRAINT "PK_FLIGHT_HISTORY" PRIMARY KEY ("HISTORY_ID")
+  USING INDEX PCTFREE 10 INITRANS 2 MAXTRANS 255 
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table FLIGHTS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."FLIGHTS" MODIFY ("FLIGHT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHTS" MODIFY ("ICAO_ADDRESS" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."FLIGHTS" ADD PRIMARY KEY ("FLIGHT_ID")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  STORAGE(INITIAL 65536 NEXT 1048576 MINEXTENTS 1 MAXEXTENTS 2147483645
+  PCTINCREASE 0 FREELISTS 1 FREELIST GROUPS 1
+  BUFFER_POOL DEFAULT FLASH_CACHE DEFAULT CELL_FLASH_CACHE DEFAULT)
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Constraints for Table ALERTS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."ALERTS" MODIFY ("ALERT_ID" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."ALERTS" MODIFY ("ALERT_TYPE" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."ALERTS" MODIFY ("ALERT_VALUE" NOT NULL ENABLE);
+  ALTER TABLE "ADSB_USER"."ALERTS" ADD PRIMARY KEY ("ALERT_ID")
+  USING INDEX PCTFREE 10 INITRANS 8 MAXTRANS 255 COMPUTE STATISTICS 
+  TABLESPACE "USERS"  ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table ALERT_HISTORY
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."ALERT_HISTORY" ADD CONSTRAINT "FK_ALERT_HISTORY" FOREIGN KEY ("ALERT_ID")
+	  REFERENCES "ADSB_USER"."ALERTS" ("ALERT_ID") ON DELETE CASCADE ENABLE;
+  ALTER TABLE "ADSB_USER"."ALERT_HISTORY" ADD CONSTRAINT "FK_ALERT_FLIGHT" FOREIGN KEY ("FLIGHT_ID")
+	  REFERENCES "ADSB_USER"."FLIGHTS" ("FLIGHT_ID") ON DELETE CASCADE ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table FLIGHTS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."FLIGHTS" ADD CONSTRAINT "FK_AIRCRAFT" FOREIGN KEY ("ICAO_ADDRESS")
+	  REFERENCES "ADSB_USER"."AIRCRAFT" ("ICAO_ADDRESS") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table FLIGHT_HISTORY
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."FLIGHT_HISTORY" ADD CONSTRAINT "FK_FLIGHT_HIST_AIRCRAFT" FOREIGN KEY ("ICAO_ADDRESS")
+	  REFERENCES "ADSB_USER"."AIRCRAFT" ("ICAO_ADDRESS") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table FLIGHT_ROUTES
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."FLIGHT_ROUTES" ADD CONSTRAINT "FK_FLIGHT_ROUTES_ORIGIN" FOREIGN KEY ("ORIGIN_AIRPORT_ID")
+	  REFERENCES "ADSB_USER"."AIRPORTS" ("AIRPORT_ID") ENABLE;
+  ALTER TABLE "ADSB_USER"."FLIGHT_ROUTES" ADD CONSTRAINT "FK_FLIGHT_ROUTES_DEST" FOREIGN KEY ("DEST_AIRPORT_ID")
+	  REFERENCES "ADSB_USER"."AIRPORTS" ("AIRPORT_ID") ENABLE;
+--------------------------------------------------------
+--  Ref Constraints for Table POSITIONS
+--------------------------------------------------------
+
+  ALTER TABLE "ADSB_USER"."POSITIONS" ADD CONSTRAINT "FK_FLIGHT" FOREIGN KEY ("FLIGHT_ID")
+	  REFERENCES "ADSB_USER"."FLIGHTS" ("FLIGHT_ID") ENABLE;
